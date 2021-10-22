@@ -11,71 +11,83 @@ Basic functions:
 - Extract Date parts (month, day, year)
 - Conditional statement  IF THEN ELSE
 
-Example:
+## Examples
 
-## Simple Math
+### Simple Math
 ````C#
 
 var result = ExpressionEvaluator.EvaluateExpression("1+1");
-
+____________________________________
 // result.number -> 2;
 // result.ToString() -> "2"
             
 ````
 
-## More Math
+### More Math
 ````C#
 
 var result = ExpressionEvaluator.EvaluateExpression("((1 + 1) * 10 / (7 / 3.5)) ^ 2 / 10000");
-
+____________________________________
 // result.number -> 1;
 // result.ToString() -> "1"
             
 ````
 
-## If Then Else
+### If Then Else
 
 ```` C#
  var result = ExpressionEvaluator.EvaluateExpression($"IF 1 > 0 THEN 'Yes, it´s true!' ELSE 'No! Your wrong ..'");
+____________________________________
 // result.ToString() -> "Yes, it´s true!");
 ````
 
-## String Comparsion
+### String Comparsion
 ````C#
 
 var result = ExpressionEvaluator.EvaluateExpression("'MyString' = 'MyString'");
+____________________________________
 // result.boolean ==  True;
 
 ````
 
-## Date Calculation
+### Date Calculation
 
 ```` C#
 var d1 = new DateTime(2020, 01, 01);
 var d2 = new DateTime(2019, 01, 01);
 var result = ExpressionEvaluator.EvaluateExpression($"{d1} - {d2}");
+____________________________________
 // result.dateRange.TotalDays -> 365
 ````
 
-## Date with strings Calculation
+````C#
+var d1 = new DateTime(2020, 01, 01);
+var d2 = new DateTime(2019, 01, 01);
+var result = ExpressionEvaluator.EvaluateExpression($"days({d1} - {d2})");
+____________________________________
+// result.number -> 365;
+````
+
+### Date with strings Calculation
 
 ```` C#
 var d1 = "01.01.2020";
 var d2 = "01.01.2019";
 var result = ExpressionEvaluator.EvaluateExpression($"{d1} - {d2}");
+____________________________________
 // result.dateRange.TotalDays -> 365
 ````
 
-## Date Parts
+### Date Parts
 ````C#
 var d1 = new DateTime(2021, 01, 01);
 var result = ExpressionEvaluator.EvaluateExpression($"Year({d1})");
-
+____________________________________
 // result.ToString() -> "2021";
             
 ````
 
-## Using Variables 
+### Using Variables 
 
 ````C#
 var values = new Dictionary<string, object>
@@ -86,6 +98,7 @@ var values = new Dictionary<string, object>
             };
 
 var result = ExpressionEvaluator.EvaluateExpression($"IF FirstVar < SecondVar THEN ResultText", values);
+____________________________________
 // result.ToString() -> "Your Right!"
 
 ````
