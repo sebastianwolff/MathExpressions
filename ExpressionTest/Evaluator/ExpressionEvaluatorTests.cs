@@ -21,6 +21,15 @@ namespace Expressionator.Expressions.Evaluator.Tests
         }
 
         [TestMethod()]
+        public void TextEqualTest()
+        {
+            var result = ExpressionEvaluator.EvaluateExpression("'hans' = 'hans'");
+
+            Assert.IsTrue(result.boolean);
+        }
+
+
+        [TestMethod()]
         public void CombineTextTest()
         {
             var result = ExpressionEvaluator.EvaluateExpression("'hans'+'hans'");
@@ -70,11 +79,11 @@ namespace Expressionator.Expressions.Evaluator.Tests
         [TestMethod()]
         public void SubstractDateTest()
         {
-            var d1 = new DateTime(2021, 01, 01);
-            var d2 = new DateTime(2020, 01, 01);
+            var d1 = new DateTime(2020, 01, 01);
+            var d2 = new DateTime(2019, 01, 01);
             var result = ExpressionEvaluator.EvaluateExpression($"{d1} - {d2}");
 
-            Assert.AreEqual(result.dateRange.TotalDays,366);
+            Assert.AreEqual(result.dateRange.TotalDays,365);
         }
 
         [TestMethod()]
