@@ -87,6 +87,16 @@ namespace Expressionator.Expressions.Evaluator.Tests
         }
 
         [TestMethod()]
+        public void SubstractDateDayTest()
+        {
+            var d1 = new DateTime(2020, 01, 01);
+            var d2 = new DateTime(2019, 01, 01);
+            var result = ExpressionEvaluator.EvaluateExpression($"days({d1} - {d2})");
+
+            Assert.AreEqual(result.number, 365);
+        }
+
+        [TestMethod()]
         public void DateYearTest()
         {
             var d1 = new DateTime(2021, 01, 01);
@@ -123,6 +133,30 @@ namespace Expressionator.Expressions.Evaluator.Tests
             var result = ExpressionEvaluator.EvaluateExpression($"WENN 1 > 0 DANN 'Yes' SONST 'No'");
 
             Assert.AreEqual(result.text , "Yes");
+        }
+
+        [TestMethod()]
+        public void MoreMathTest()
+        {
+            var result = ExpressionEvaluator.EvaluateExpression($" ((1 + 1) * 10 / (7 / 3.5)) ^ 2 / 10000");
+
+            Assert.AreEqual(result.number, 1);
+        }
+
+
+        [TestMethod()]
+        public void VarUsageTest()
+        {
+            var values = new Dictionary<string, object>
+            {
+                { "FirstVar", 1.75 },
+                { "SecondVar", 2 },
+                { "ResultText", "Your Right!" }
+            };
+
+            var result = ExpressionEvaluator.EvaluateExpression($"IF FirstVar < SecondVar THEN ResultText", values);
+
+            Assert.AreEqual(result.text, values["ResultText"]);
         }
 
         [TestMethod()]
