@@ -5,11 +5,11 @@ This library interprets mathematical expressions from text input.
 
 Basic functions:
 
-- Math operations [+] [-] [\\] [*] [^]
-- Comparsion: [<] [<=] [>] [>=] [=] 
-- Text comparisons
+- Math Operations [+] [-] [\\] [*] [^]
+- String, Date, Number Comparsion [<] [<=] [>] [>=] [=] 
 - Date calculations (Range)
-- Extract date components (month, day, year)
+- Extract Date parts (month, day, year)
+- Conditional statement  IF THEN ELSE
 
 Example:
 
@@ -23,10 +23,27 @@ var result = ExpressionEvaluator.EvaluateExpression("1+1");
             
 ````
 
+## More Math
+````C#
+
+var result = ExpressionEvaluator.EvaluateExpression("((1 + 1) * 10 / (7 / 3.5)) ^ 2 / 10000");
+
+// result.number -> 1;
+// result.ToString() -> "1"
+            
+````
+
+## If Then Else
+
+```` C#
+ var result = ExpressionEvaluator.EvaluateExpression($"IF 1 > 0 THEN 'Yes, it´s true!' ELSE 'No! Your wrong ..'");
+// result.ToString() -> "Yes, it´s true!");
+````
+
 ## String Comparsion
 ````C#
 
-var result = ExpressionEvaluator.EvaluateExpression("'hans' = 'hans'");
+var result = ExpressionEvaluator.EvaluateExpression("'MyString' = 'MyString'");
 // result.boolean ==  True;
 
 ````
