@@ -71,7 +71,7 @@ var result = ExpressionEvaluator.EvaluateExpression($"Year({d1})");
 ````C#
 var values = new Dictionary<string, object>
             {
-                { "FirstVar", 1 },
+                { "FirstVar", 1.75 },
                 { "SecondVar", 2 },
                 { "ResultText", "Your Right!" }
             };
