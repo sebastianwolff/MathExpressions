@@ -65,3 +65,20 @@ var result = ExpressionEvaluator.EvaluateExpression($"Year({d1})");
 // result.ToString() -> "2021";
             
 ````
+
+## Using Variables 
+
+````C#
+var values = new Dictionary<string, object>
+            {
+                { "FirstVar", 1 },
+                { "SecondVar", 2 },
+                { "ResultText", "Your Right!" }
+            };
+
+var result = ExpressionEvaluator.EvaluateExpression($"IF FirstVar < SecondVar THEN ResultText", values);
+// result.ToString() -> "Your Right!"
+
+````
+
+
