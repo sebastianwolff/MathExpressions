@@ -57,6 +57,15 @@ var result = ExpressionEvaluator.EvaluateExpression($"{d1} - {d2}");
 // result.dateRange.TotalDays -> 365
 ````
 
+## Date with strings Calculation
+
+```` C#
+var d1 = "01.01.2020";
+var d2 = "01.01.2019";
+var result = ExpressionEvaluator.EvaluateExpression($"{d1} - {d2}");
+// result.dateRange.TotalDays -> 365
+````
+
 ## Date Parts
 ````C#
 var d1 = new DateTime(2021, 01, 01);
