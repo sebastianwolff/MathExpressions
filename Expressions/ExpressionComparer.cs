@@ -14,7 +14,7 @@ namespace Expressionator.Expressions
 
 		public static double CompareExpression(Node primary, Node secondary)
 		{
-			ExpressionComparer comparer = new ExpressionComparer();
+			var comparer = new ExpressionComparer();
 			return comparer.Compare(primary, secondary);
 		}
 
@@ -26,7 +26,7 @@ namespace Expressionator.Expressions
 				this.secondary = secondary;
 				this.result = -1;
 
-				primary.accept(this);
+				primary.Accept(this);
 
 				return result;
 			}
@@ -38,133 +38,133 @@ namespace Expressionator.Expressions
 
 		#region INodeVisitor Members
 
-		public void visit(AddNode addNode)
+		public void Visit(AddNode addNode)
 		{
 			if (addNode.GetType() == secondary.GetType())
-				if (Compare(addNode.left, ((AddNode)secondary).left) == 0)
-					if (Compare(addNode.right, ((AddNode)secondary).right) == 0)
+				if (Compare(addNode.Left, ((AddNode)secondary).Left) == 0)
+					if (Compare(addNode.Right, ((AddNode)secondary).Right) == 0)
 						result = 0;
 		}
 
-		public void visit(NegNode negNode)
+		public void Visit(NegNode negNode)
 		{
 			if (negNode.GetType() == secondary.GetType())
-				if (Compare(negNode.subExpression, ((NegNode)secondary).subExpression) == 0)
+				if (Compare(negNode.SubExpression, ((NegNode)secondary).SubExpression) == 0)
 					result = 0;
 		}
 
-		public void visit(MulNode mulNode)
+		public void Visit(MulNode mulNode)
 		{
 			if (mulNode.GetType() == secondary.GetType())
-				if (Compare(mulNode.left, ((MulNode)secondary).left) == 0)
-					if (Compare(mulNode.right, ((MulNode)secondary).right) == 0)
+				if (Compare(mulNode.Left, ((MulNode)secondary).Left) == 0)
+					if (Compare(mulNode.Right, ((MulNode)secondary).Right) == 0)
 						result = 0;
 		}
 
-		public void visit(DivNode divNode)
+		public void Visit(DivNode divNode)
 		{
 			if (divNode.GetType() == secondary.GetType())
-				if (Compare(divNode.left, ((DivNode)secondary).left) == 0)
-					if (Compare(divNode.right, ((DivNode)secondary).right) == 0)
+				if (Compare(divNode.Left, ((DivNode)secondary).Left) == 0)
+					if (Compare(divNode.Right, ((DivNode)secondary).Right) == 0)
 						result = 0;
 		}
 
-		public void visit(NumberNode numberNode)
+		public void Visit(NumberNode numberNode)
 		{
 			if (numberNode.GetType() == secondary.GetType())
-				result = (numberNode.value - ((NumberNode)secondary).value);
+				result = (numberNode.Value - ((NumberNode)secondary).Value);
 		}
 
-		public void visit(TextNode textNode)
+		public void Visit(TextNode textNode)
 		{
 			if (textNode.GetType() == secondary.GetType())
 				result = string.Compare(textNode.Value, ((TextNode)secondary).Value, StringComparison.CurrentCultureIgnoreCase);
 		}
 
-		public void visit(PowNode powNode)
+		public void Visit(PowNode powNode)
 		{
 			if (powNode.GetType() == secondary.GetType())
-				if (Compare(powNode.powBase, ((PowNode)secondary).powBase) == 0)
-					if (Compare(powNode.exp, ((PowNode)secondary).exp) == 0)
+				if (Compare(powNode.PowBase, ((PowNode)secondary).PowBase) == 0)
+					if (Compare(powNode.Exp, ((PowNode)secondary).Exp) == 0)
 						result = 0;
 		}
 
-		public void visit(CondExpr condNode)
+		public void Visit(CondExpr condNode)
 		{
 			if (condNode.GetType() == secondary.GetType()
-					&& Compare(condNode.condExpr, ((CondExpr)secondary).condExpr) == 0
-					&& Compare(condNode.thenExpr, ((CondExpr)secondary).thenExpr) == 0
-					&& Compare(condNode.elseExpr, ((CondExpr)secondary).elseExpr) == 0)
+					&& Compare(condNode.Expression, ((CondExpr)secondary).Expression) == 0
+					&& Compare(condNode.ThenExpr, ((CondExpr)secondary).ThenExpr) == 0
+					&& Compare(condNode.ElseExpr, ((CondExpr)secondary).ElseExpr) == 0)
 				result = 0;
 		}
 
-		public void visit(CompareNode compareNode)
+		public void Visit(CompareNode compareNode)
 		{
 			if (compareNode.GetType() == secondary.GetType()
-					&& compareNode.compare == ((CompareNode)secondary).compare
-					&& Compare(compareNode.left, ((CompareNode)secondary).left) == 0
-					&& Compare(compareNode.right, ((CompareNode)secondary).right) == 0)
+					&& compareNode.Compare == ((CompareNode)secondary).Compare
+					&& Compare(compareNode.Left, ((CompareNode)secondary).Left) == 0
+					&& Compare(compareNode.Right, ((CompareNode)secondary).Right) == 0)
 				result = 0;
 		}
 
-		public void visit(VariableNode variableNode)
+		public void Visit(VariableNode variableNode)
 		{
 			if (variableNode.GetType() == secondary.GetType()
-					&& variableNode.name == ((VariableNode)secondary).name)
+					&& variableNode.Name == ((VariableNode)secondary).Name)
 				result = 0;
 		}
 
-		public void visit(RangeNode rangeNode)
+		public void Visit(RangeNode rangeNode)
 		{
 			if (rangeNode.GetType() == secondary.GetType()
-					&& Compare(rangeNode.low, ((RangeNode)rangeNode).low) == 0
-					&& Compare(rangeNode.high, ((RangeNode)rangeNode).high) == 0)
+					&& Compare(rangeNode.Low, ((RangeNode)rangeNode).Low) == 0
+					&& Compare(rangeNode.High, ((RangeNode)rangeNode).High) == 0)
 				result = 0;
 		}
 
-		public void visit(ContainsNode contains)
+		public void Visit(ContainsNode contains)
 		{
 			if (contains.GetType() == secondary.GetType()
-					&& Compare(contains.test, ((ContainsNode)secondary).test) == 0
-					&& Compare(contains.range, ((ContainsNode)secondary).range) == 0)
+					&& Compare(contains.Test, ((ContainsNode)secondary).Test) == 0
+					&& Compare(contains.Range, ((ContainsNode)secondary).Range) == 0)
 				result = 0;
 		}
 
-		public void visit(DateExpr date)
+		public void Visit(DateExpr date)
 		{
 			if (date.GetType() == secondary.GetType()
-					&& date.date == ((DateExpr)secondary).date)
-				result = (date.date.Ticks - ((DateExpr)secondary).date.Ticks);
+					&& date.Date == ((DateExpr)secondary).Date)
+				result = (date.Date.Ticks - ((DateExpr)secondary).Date.Ticks);
 		}
 
-		public void visit(DateCastExpr dateCast)
+		public void Visit(DateCastExpr dateCast)
 		{
 			if (dateCast.GetType() == secondary.GetType()
-					&& dateCast.unit == ((DateCastExpr)secondary).unit
-					&& Compare(dateCast.subExpression, ((DateCastExpr)secondary).subExpression) == 0)
+					&& dateCast.Unit == ((DateCastExpr)secondary).Unit
+					&& Compare(dateCast.SubExpression, ((DateCastExpr)secondary).SubExpression) == 0)
 				result = 0;
 		}
 
-		public void visit(DateQualExpr dateQual)
+		public void Visit(DateQualExpr dateQual)
 		{
 			if (dateQual.GetType() == secondary.GetType()
-					&& dateQual.qual == ((DateQualExpr)secondary).qual
-					&& Compare(dateQual.expression, ((DateQualExpr)secondary).expression) == 0)
+					&& dateQual.Qual == ((DateQualExpr)secondary).Qual
+					&& Compare(dateQual.Expression, ((DateQualExpr)secondary).Expression) == 0)
 				result = 0;
 		}
 
-		public void visit(TimeSpanCastExpr timeSpan)
+		public void Visit(TimeSpanCastExpr timeSpan)
 		{
 			if (timeSpan.GetType() == secondary.GetType()
-					&& timeSpan.timeSpan == ((TimeSpanCastExpr)secondary).timeSpan)
+					&& timeSpan.TimeSpan == ((TimeSpanCastExpr)secondary).TimeSpan)
 				result = 0;
 		}
 
-		public void visit(RoundCastExpr roundCast)
+		public void Visit(RoundCastExpr roundCast)
 		{
 			if (roundCast.GetType() == secondary.GetType()
-					&& roundCast.decimals == ((RoundCastExpr)secondary).decimals
-					&& Compare(roundCast.expression, ((RoundCastExpr)secondary).expression) == 0)
+					&& roundCast.Decimals == ((RoundCastExpr)secondary).Decimals
+					&& Compare(roundCast.Expression, ((RoundCastExpr)secondary).Expression) == 0)
 				result = 0;
 		}
 		#endregion

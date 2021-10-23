@@ -29,6 +29,8 @@
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageProjectUrl>https://github.com/sebastianwolff/MathExpressions</PackageProjectUrl>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageId>MathExpression.net</PackageId>
+    <PackageTags>.net 5, Expression Parser, Math Expressions</PackageTags>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <OutputPath>..\..\..\..\Debug\bin\</OutputPath>

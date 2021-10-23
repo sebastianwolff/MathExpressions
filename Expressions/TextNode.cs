@@ -18,8 +18,8 @@ namespace Expressionator.Expressions {
 			FValue = AValue;
 		}
 
-		public override void accept(INodeVisitor visitor) {
-			visitor.visit(this);
+		public override void Accept(INodeVisitor visitor) {
+			visitor.Visit(this);
 		}
 	}
 }

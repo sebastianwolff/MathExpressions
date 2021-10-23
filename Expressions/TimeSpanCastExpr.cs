@@ -6,7 +6,7 @@ namespace Expressionator.Expressions
 {
 	public class TimeSpanCastExpr : Node
 	{
-		public enum Unit
+		public enum Units
 		{
 			None,
 			Day,
@@ -14,34 +14,34 @@ namespace Expressionator.Expressions
 			Year
 		}
 
-		private Unit _unit;
-		private Node _timeSpan;
+		private readonly Units _unit;
+		private readonly Node _timeSpan;
 
-		public Unit unit
+		public Units Unit
 		{
 			get { return _unit; }
 		}
 
-		public Node timeSpan
+		public Node TimeSpan
 		{
 			get { return _timeSpan; }
 		}
 
 		public TimeSpanCastExpr(Node timeSpan)
 		{
-			_unit = Unit.None;
+			_unit = Units.None;
 			_timeSpan = timeSpan;
 		}
 
-		public TimeSpanCastExpr(Unit unit, Node timeSpan)
+		public TimeSpanCastExpr(Units unit, Node timeSpan)
 		{
 			_unit = unit;
 			_timeSpan = timeSpan;
 		}
 
-		public override void accept(INodeVisitor visitor)
+		public override void Accept(INodeVisitor visitor)
 		{
-			visitor.visit(this);
+			visitor.Visit(this);
 		}
 	}
 }

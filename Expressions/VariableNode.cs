@@ -9,7 +9,7 @@ namespace Expressionator.Expressions
 	/// </summary>
 	public class VariableNode : SymbolNode
 	{
-		bool _constant;
+        readonly bool _constant;
 
 		/// <summary>
 		/// initializes the variable leaf-node.
@@ -21,9 +21,9 @@ namespace Expressionator.Expressions
 			_constant = constant;
 		}
 
-		public override void accept(INodeVisitor visitor)
+		public override void Accept(INodeVisitor visitor)
 		{
-			visitor.visit(this);
+			visitor.Visit(this);
 		}
 	}
 }

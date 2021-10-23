@@ -6,18 +6,18 @@ namespace Expressionator.Expressions
 {
 	public class PowNode : Node
 	{
-		private Node _base;
-		private Node _exp;
+		private readonly Node _base;
+		private readonly Node _exp;
 
 		#region prooperty accessors
-		public Node powBase
+		public Node PowBase
 		{
 			get
 			{
 				return _base;
 			}
 		}
-		public Node exp
+		public Node Exp
 		{
 			get
 			{
@@ -32,9 +32,9 @@ namespace Expressionator.Expressions
 			_exp = exp;
 		}
 
-		public override void accept(INodeVisitor visitor)
+		public override void Accept(INodeVisitor visitor)
 		{
-			visitor.visit(this);
+			visitor.Visit(this);
 		}
 	}
 }

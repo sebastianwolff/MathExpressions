@@ -20,7 +20,7 @@ namespace Expressionator.Expressions.Evaluator
 		public class Result
 		{
 			#region types
-			public enum Type
+			public enum ResultTypes
 			{
 				Boolean,
 				Number,
@@ -35,90 +35,90 @@ namespace Expressionator.Expressions.Evaluator
 			#endregion
 
 			#region data
-			private Type _type;
+			private readonly ResultTypes _type;
 
-			private double _number;
-			private bool _boolean;
-			private DateTime _date;
-			private TimeSpan _timeSpan;
-			private DateRange _dateRange;
-			private string _text;
-			private NumberRange<double> _numberRange;
-			private KeyValuePair<TimeSpan, TimeSpan> _timeSpanRange;
+			private readonly double _number;
+			private readonly bool _boolean;
+			private readonly DateTime _date;
+			private readonly TimeSpan _timeSpan;
+			private readonly DateRange _dateRange;
+			private readonly string _text;
+			private readonly NumberRange<double> _numberRange;
+			private readonly KeyValuePair<TimeSpan, TimeSpan> _timeSpanRange;
 			#endregion
 
 			#region property accessors
-			public Type type
+			public ResultTypes Type
 			{
 				get { return _type; }
 			}
 
-			public bool boolean
+			public bool Boolean
 			{
 				get 
 				{
-					AssumeType(Type.Boolean);
+					AssumeType(ResultTypes.Boolean);
 					return _boolean;
 				}
 			}
 
-			public double number
+			public double Number
 			{
 				get
 				{
-					AssumeType(Type.Number);
+					AssumeType(ResultTypes.Number);
 					return _number;
 				}
 			}
 
-			public DateTime date
+			public DateTime Date
 			{
 				get
 				{
-					AssumeType(Type.Date);
+					AssumeType(ResultTypes.Date);
 					return _date.Date;
 				}
 			}
 
-			public TimeSpan timeSpan
+			public TimeSpan TimeSpan
 			{
 				get
 				{
-					AssumeType(Type.TimeSpan);
+					AssumeType(ResultTypes.TimeSpan);
 					return _timeSpan;
 				}
 			}
 
-			public string text {
+			public string Text {
 				get {
-					AssumeType(Type.Text);
+					AssumeType(ResultTypes.Text);
 					return _text;
 				}
 			}
 
-			public DateRange dateRange
+			public DateRange DateRange
 			{
 				get
 				{
-					AssumeType(Type.DateRange);
+					AssumeType(ResultTypes.DateRange);
 					return _dateRange;
 				}
 			}
 
-			public NumberRange<double> numberRange
+			public NumberRange<double> NumberRange
 			{
 				get
 				{
-					AssumeType(Type.NumberRange);
+					AssumeType(ResultTypes.NumberRange);
 					return _numberRange;
 				}
 			}
 
-			public KeyValuePair<TimeSpan, TimeSpan> timeSpanRange
+			public KeyValuePair<TimeSpan, TimeSpan> TimeSpanRange
 			{
 				get
 				{
-					AssumeType(Type.TimeSpanRange);
+					AssumeType(ResultTypes.TimeSpanRange);
 					return _timeSpanRange;
 				}
 			}
@@ -127,110 +127,112 @@ namespace Expressionator.Expressions.Evaluator
 			#region constructors
 			public Result(bool boolean)
 			{
-				_type = Type.Boolean;
+				_type = ResultTypes.Boolean;
 				_boolean = boolean;
 			}
 
 			public Result(double number)
 			{
-				_type = Type.Number;
+				_type = ResultTypes.Number;
 				_number = number;
 			}
 
 			public Result(DateTime date)
 			{
-				_type = Type.Date;
+				_type = ResultTypes.Date;
 				_date = date;
 			}
 
 			public Result(TimeSpan timeSpan)
 			{
-				_type = Type.TimeSpan;
+				_type = ResultTypes.TimeSpan;
 				_timeSpan = timeSpan;
 			}
 
 			public Result(DateRange dateRange)
 			{
-				_type = Type.DateRange;
+				_type = ResultTypes.DateRange;
 				_dateRange = dateRange;
 			}
 
 			public Result(DateTime begin, DateTime end)
 			{
-				_type = Type.DateRange;
+				_type = ResultTypes.DateRange;
 				_dateRange = new DateRange(begin, end);
 			}
 
 			public Result(NumberRange<double> numberRange)
 			{
-				_type = Type.NumberRange;
+				_type = ResultTypes.NumberRange;
 				_numberRange = numberRange;
 			}
 
 			public Result(double low, double high)
 			{
-				_type = Type.NumberRange;
+				_type = ResultTypes.NumberRange;
 				_numberRange = new NumberRange<double>(low, high);
 			}
 
 			public Result(TimeSpan low, TimeSpan high)
 			{
-				_type = Type.TimeSpanRange;
+				_type = ResultTypes.TimeSpanRange;
                 _timeSpanRange = new KeyValuePair<TimeSpan, TimeSpan>(low, high);
                 //_timeSpanRange.Key = low;
                 //_timeSpanRange.Value = high;
 			}
 
 			public Result(string text) {
-				_type = Type.Text;
+				_type = ResultTypes.Text;
 				_text = text;
 			}
 			#endregion
 
-			private void AssumeType(Type assumedType)
+			private void AssumeType(ResultTypes assumedType)
 			{
-				if (type != assumedType)
+				if (Type != assumedType)
 				{
 					throw new InvalidCastException(String.Format(
 						"Unexpected result type {0}. Expected {1}.",
-						type.ToString(), assumedType.ToString()
+						Type.ToString(), assumedType.ToString()
 					));
 				}
 			}
 
 			public override string ToString()
 			{
-				switch (type)
-				{
-					case Type.Boolean:
-						return boolean.ToString();
-					case Type.Date:
-						return date.ToString();
-					case Type.DateRange:
-						return String.Format("DATERANGE({0})", dateRange);
-					case Type.Number:
-						return number.ToString();
-					case Type.NumberRange:
-						return String.Format("NUMBERRANGE({0})", numberRange);
-					case Type.TimeSpan:
-						return String.Format("TIMESPAN({0})", timeSpan);
-					case Type.TimeSpanRange:
-						return String.Format("TIMESPAN({0}) .. TIMESPAN({1})", timeSpanRange.Key, timeSpanRange.Value);
-					case Type.Text:
-						return _text;
-					default:
-						throw new Exception("Internal error: Unhandled enum value.");
-				}
-			}
-		}
-		#endregion
+                switch (Type)
+                {
+                    case ResultTypes.Boolean:
+                        return Boolean.ToString();
+                    case ResultTypes.Date:
+                        return Date.ToString();
+                    case ResultTypes.DateRange:
+                        return String.Format("DATERANGE({0})", DateRange);
+                    case ResultTypes.Number:
+                        return Number.ToString();
+                    case ResultTypes.NumberRange:
+                        return String.Format("NUMBERRANGE({0})", NumberRange);
+                    case ResultTypes.TimeSpan:
+                        return String.Format("TIMESPAN({0})", TimeSpan);
+                    case ResultTypes.TimeSpanRange:
+                        return String.Format("TIMESPAN({0}) .. TIMESPAN({1})", TimeSpanRange.Key, TimeSpanRange.Value);
+                    case ResultTypes.Text:
+                        return _text;
+                    case ResultTypes.TextRange:
+						throw new NotImplementedException("TextRange not implemented");
+                    default:
+                        throw new Exception("Internal error: Unhandled enum value.");
+                }
+            }
+        }
+        #endregion
 
-		/// <summary>
-		/// this delegate is used for on-demand variable evaluation.
-		/// </summary>
-		/// <param name="node">the variable-node to evaluate</param>
-		/// <returns>the respective value</returns>
-		public delegate Result EvaluateVariableDelegate(VariableNode node);
+        /// <summary>
+        /// this delegate is used for on-demand variable evaluation.
+        /// </summary>
+        /// <param name="node">the variable-node to evaluate</param>
+        /// <returns>the respective value</returns>
+        public delegate Result EvaluateVariableDelegate(VariableNode node);
 
 		/// <summary>
 		/// this delegate gets invoked on evaluating variable nodes to return their respective value.
@@ -269,49 +271,60 @@ namespace Expressionator.Expressions.Evaluator
 
 			if (typeof(T) == typeof(DateRange))
 			{
-				result = evalResult.dateRange;
+				result = evalResult.DateRange;
             }
             else
             {
-				switch (Type.GetTypeCode(typeof(T)))
-				{
-					case TypeCode.String:
-						result = evalResult.ToString();
-						break;
-					case TypeCode.Int32:
+                switch (Type.GetTypeCode(typeof(T)))
+                {
+                    case TypeCode.String:
+                        result = evalResult.ToString();
+                        break;
+                    case TypeCode.Int32:
+					case TypeCode.UInt16:
+					case TypeCode.UInt32:
+					case TypeCode.Int64:
+					case TypeCode.UInt64:
+					case TypeCode.Single:
 					case TypeCode.Int16:
-						result = (T)(object)Convert.ToInt32(evalResult.number);
-						break;
-					case TypeCode.Double:
-						result = evalResult.number;
-						break;
-					case TypeCode.Decimal:
-						result = (decimal)evalResult.number;
-						break;
-					case TypeCode.Boolean:
-						result = evalResult.boolean;
-						break;
-					case TypeCode.DateTime:
-						result = evalResult.date;
-						break;
-					default:
-						throw new NotSupportedException($"{typeof(T)} is not not supported yet");
-						
-				}
+                        result = (T)(object)Convert.ToInt32(evalResult.Number);
+                        break;
+                    case TypeCode.Double:
+                        result = evalResult.Number;
+                        break;
+                    case TypeCode.Decimal:
+                        result = (decimal)evalResult.Number;
+                        break;
+                    case TypeCode.Boolean:
+                        result = evalResult.Boolean;
+                        break;
+                    case TypeCode.DateTime:
+                        result = evalResult.Date;
+                        break;
+                    case TypeCode.Empty:
+                    case TypeCode.Object:
+                    case TypeCode.DBNull:
+                    case TypeCode.Char:
+                    case TypeCode.SByte:
+                    case TypeCode.Byte:
+                    default:
+                        throw new NotSupportedException($"{typeof(T)} is not not supported yet");
+
+                }
             }
 
-			return (T)result;
-		}
+            return (T)result;
+        }
 
-		/// <summary>
-		/// a little abbreviation method for quickly evaluating a parametrized expression evaluation.
-		/// </summary>
-		/// <param name="expression">the mathematical expression to evaluate</param>
-		/// <param name="variableMap">contains a set of variables (name-value pairs) that are being referenced when they occur within the given expression</param>
-		/// <returns>the respective evaluated result value</returns>
-		public static Result EvaluateExpression(string expression, Dictionary<string, string> variableMap)
+        /// <summary>
+        /// a little abbreviation method for quickly evaluating a parametrized expression evaluation.
+        /// </summary>
+        /// <param name="expression">the mathematical expression to evaluate</param>
+        /// <param name="variableMap">contains a set of variables (name-value pairs) that are being referenced when they occur within the given expression</param>
+        /// <returns>the respective evaluated result value</returns>
+        public static Result EvaluateExpression(string expression, Dictionary<string, string> variableMap)
 		{
-			Dictionary<string, Node> vars = new Dictionary<string, Node>();
+			var vars = new Dictionary<string, Node>();
 
 			foreach (KeyValuePair<string, string> pair in variableMap)
 				vars[pair.Key] = ExpressionBuilder.ParseExpression(pair.Value);
@@ -321,7 +334,7 @@ namespace Expressionator.Expressions.Evaluator
 
 		public static Result EvaluateExpression(string expression, IDictionary<string, object> variables)
 		{
-			Dictionary<string, Node> vars = new Dictionary<string, Node>();
+			var vars = new Dictionary<string, Node>();
 
 			foreach (KeyValuePair<string, object> variable in variables)
 				vars[variable.Key] = CreateNode(variable.Value);
@@ -331,14 +344,14 @@ namespace Expressionator.Expressions.Evaluator
 
 		private static Node CreateNode(object value) 
 		{
-			if (value is Node)
-				return (Node)value; // TODO: use ExpressionCloner.Clone(value);
+			if (value is Node node)
+				return node; // TODO: use ExpressionCloner.Clone(value);
 
-			if (value is DateTime)
-				return new DateExpr((DateTime)value);
+			if (value is DateTime time)
+				return new DateExpr(time);
 
-			if (value is string)
-				return new TextNode((string)value);
+			if (value is string stringVal)
+				return new TextNode(stringVal);
 
 			return ExpressionBuilder.ParseExpression(value.ToString());
 		}
@@ -388,52 +401,55 @@ namespace Expressionator.Expressions.Evaluator
 		/// <returns>the respective evaluated result value</returns>
 		public static Result EvaluateExpression(Node expression, Dictionary<string, Result> variableMap)
 		{
-			Dictionary<string, Node> variableNodeMap = new Dictionary<string, Node>(variableMap.Count);
+			var variableNodeMap = new Dictionary<string, Node>(variableMap.Count);
 
 			foreach (KeyValuePair<string, Result> current in variableMap)
 			{
-				switch (current.Value.type)
-				{
-					case Result.Type.Boolean:
-						variableNodeMap[current.Key] = new NumberNode(1);
-						break;
-					case Result.Type.Date:
-						variableNodeMap[current.Key] = new DateExpr(current.Value.date);
-						break;
-					case Result.Type.DateRange:
-						variableNodeMap[current.Key] = new RangeNode(
-							new DateExpr(current.Value.dateRange.Begin),
-							new DateExpr(current.Value.dateRange.End)
-						);
-						break;
-					case Result.Type.Number:
-						variableNodeMap[current.Key] = new NumberNode(current.Value.number);
-						break;
-					case Result.Type.NumberRange:
-						variableNodeMap[current.Key] = new RangeNode(
-							new NumberNode(current.Value.numberRange.Min),
-							new NumberNode(current.Value.numberRange.Max)
-						);
-						break;
-					case Result.Type.TimeSpan:
-						variableNodeMap[current.Key] = new NumberNode(current.Value.timeSpan.Ticks);
-						break;
-					default:
-						throw new Exception("Internal Error: Unhandled enum type.");
-				}
-			}
+                switch (current.Value.Type)
+                {
+                    case Result.ResultTypes.Boolean:
+                        variableNodeMap[current.Key] = new NumberNode(1);
+                        break;
+                    case Result.ResultTypes.Date:
+                        variableNodeMap[current.Key] = new DateExpr(current.Value.Date);
+                        break;
+                    case Result.ResultTypes.DateRange:
+                        variableNodeMap[current.Key] = new RangeNode(
+                            new DateExpr(current.Value.DateRange.Begin),
+                            new DateExpr(current.Value.DateRange.End)
+                        );
+                        break;
+                    case Result.ResultTypes.Number:
+                        variableNodeMap[current.Key] = new NumberNode(current.Value.Number);
+                        break;
+                    case Result.ResultTypes.NumberRange:
+                        variableNodeMap[current.Key] = new RangeNode(
+                            new NumberNode(current.Value.NumberRange.Min),
+                            new NumberNode(current.Value.NumberRange.Max)
+                        );
+                        break;
+                    case Result.ResultTypes.TimeSpan:
+                        variableNodeMap[current.Key] = new NumberNode(current.Value.TimeSpan.Ticks);
+                        break;
+                    case Result.ResultTypes.Text:
+                    case Result.ResultTypes.TextRange:
+                    case Result.ResultTypes.TimeSpanRange:
+                    default:
+                        throw new Exception("Internal Error: Unhandled enum type.");
+                }
+            }
 
-			return EvaluateExpression(expression, variableNodeMap, 1);
-		}
+            return EvaluateExpression(expression, variableNodeMap, 1);
+        }
 
-		/// <summary>
-		/// Evaluates a given mathematical expression and automatically resolves all 
-		/// variables as defined in the given variable-map.
-		/// </summary>
-		/// <param name="expression">the mathematical expression to evaluate</param>
-		/// <param name="variableMap">contains a set of variables (name-value pairs) that are being referenced when they occur within the given expression</param>
-		/// <returns>the respective evaluated result value</returns>
-		public static Result EvaluateExpression(Node expression, Dictionary<string, Node> variableMap)
+        /// <summary>
+        /// Evaluates a given mathematical expression and automatically resolves all 
+        /// variables as defined in the given variable-map.
+        /// </summary>
+        /// <param name="expression">the mathematical expression to evaluate</param>
+        /// <param name="variableMap">contains a set of variables (name-value pairs) that are being referenced when they occur within the given expression</param>
+        /// <returns>the respective evaluated result value</returns>
+        public static Result EvaluateExpression(Node expression, Dictionary<string, Node> variableMap)
 		{
 			return EvaluateExpression(expression, variableMap, 64);
 		}
@@ -448,15 +464,16 @@ namespace Expressionator.Expressions.Evaluator
 		/// <returns>the respective evaluated result value</returns>
 		public static Result EvaluateExpression(Node expression, Dictionary<string, Node> variableMap, int recursionLimit)
 		{
-			ExpressionEvaluator evaluator = new ExpressionEvaluator();
+            var evaluator = new ExpressionEvaluator
+            {
+                recursionDepth = 0,
+                recursionLimit = recursionLimit,
+				variableMap = variableMap
+            };
 
-			evaluator.recursionDepth = 0;
-			evaluator.recursionLimit = recursionLimit;
+            evaluator.evaluateVariable = new EvaluateVariableDelegate(evaluator.EvaluateVariableFromMap);
 
-			evaluator.variableMap = variableMap;
-			evaluator.evaluateVariable = new EvaluateVariableDelegate(evaluator.evaluateVariableFromMap);
-
-			expression.accept(evaluator);
+			expression.Accept(evaluator);
 
 			return evaluator.result;
 		}
@@ -470,10 +487,12 @@ namespace Expressionator.Expressions.Evaluator
 		/// <returns></returns>
 		public static Result EvaluateExpression(Node expression, EvaluateVariableDelegate evalVar)
 		{
-			ExpressionEvaluator evaluator = new ExpressionEvaluator();
-			evaluator.evaluateVariable = evalVar;
+            var evaluator = new ExpressionEvaluator
+            {
+                evaluateVariable = evalVar
+            };
 
-			expression.accept(evaluator);
+            expression.Accept(evaluator);
 
 			return evaluator.result;
 		}
@@ -488,17 +507,17 @@ namespace Expressionator.Expressions.Evaluator
 		/// </summary>
 		/// <param name="variableNode">the VariableNode instance to evaluate</param>
 		/// <returns>their respective number representation</returns>
-		private Result evaluateVariableFromMap(VariableNode variableNode)
+		private Result EvaluateVariableFromMap(VariableNode variableNode)
 		{
-			if (variableMap.ContainsKey(variableNode.name))
+			if (variableMap.ContainsKey(variableNode.Name))
 			{
 				if (++recursionDepth >= recursionLimit)
 					throw new Exception(String.Format("Evaluation exceeds recursion limit of {0}", recursionLimit));
 
-				return Evaluate(variableMap[variableNode.name]);
+				return Evaluate(variableMap[variableNode.Name]);
 			}
 
-			throw new Exception("Unresolved symbol '" + variableNode.name + "'");
+			throw new Exception("Unresolved symbol '" + variableNode.Name + "'");
 		}
 
 		// -------------------------------------------------------------------------------------------
@@ -510,12 +529,12 @@ namespace Expressionator.Expressions.Evaluator
 		/// <returns>their respective scalar result value</returns>
 		public Result Evaluate(Node node)
 		{
-			node.accept(this);
+			node.Accept(this);
 			return result;
 		}
 
 		#region INodeVisitor implementation
-		public void visit(AddNode node)
+		public void Visit(AddNode node)
 		{
 			// SEMANTICS:
 			//     number + number
@@ -533,214 +552,249 @@ namespace Expressionator.Expressions.Evaluator
 			//     (date + -timespan) := DATE
 			//     (date + -date) := DATERANGE
 
-			Result left = Evaluate(node.left);
-			Result right = Evaluate(node.right);
+			Result left = Evaluate(node.Left);
+			Result right = Evaluate(node.Right);
 
-			if (left.type == Result.Type.Text || right.type == Result.Type.Text) {
+			if (left.Type == Result.ResultTypes.Text || right.Type == Result.ResultTypes.Text) {
 				result = new Result(left.ToString() + right.ToString());
 				return;
 			}
 
-			switch (left.type)
+			switch (left.Type)
 			{
-				case Result.Type.Date:
+				case Result.ResultTypes.Date:
 					// XXX: SPECIAL CASE: the difference of two dates is a timespan!
-					if (node.right.GetType() == typeof(NegNode))
+					if (node.Right.GetType() == typeof(NegNode))
 					{
-						Result dateRight = Evaluate(((NegNode)node.right).subExpression);
+						Result dateRight = Evaluate(((NegNode)node.Right).SubExpression);
 
-						if (dateRight.type == Result.Type.Date)
+						if (dateRight.Type == Result.ResultTypes.Date)
 						{
-							result = left.date < dateRight.date
-								? new Result(new DateRange(left.date, dateRight.date))
-								: new Result(new DateRange(dateRight.date, left.date));
+							result = left.Date < dateRight.Date
+								? new Result(new DateRange(left.Date, dateRight.Date))
+								: new Result(new DateRange(dateRight.Date, left.Date));
 
 							break;
 						}
 					}
 
-					if (right.type != Result.Type.TimeSpan)
+					if (right.Type != Result.ResultTypes.TimeSpan)
 						throw new Exception("Operator evaluation error: Invalid operand type combination.");
 
-					result = new Result(left.date.Add(right.timeSpan));
+					result = new Result(left.Date.Add(right.TimeSpan));
 
 					break;
-				case Result.Type.Number:
-					if (right.type != left.type)
+				case Result.ResultTypes.Number:
+					if (right.Type != left.Type)
 						throw new Exception("Operator evaluation error: Invalid operand type combination.");
 
-					result = new Result(left.number + right.number);
+					result = new Result(left.Number + right.Number);
 
 					break;
-				case Result.Type.TimeSpan:
-					switch (right.type)
-					{
-						case Result.Type.Date:
-							result = new Result(right.date.Add(left.timeSpan));
-							break;
-						case Result.Type.TimeSpan:
-							result = new Result(left.timeSpan.Add(right.timeSpan));
-							break;
-						default:
-							throw new ExpressionEvaluationException("Incompatible operand types.");
-					}
-					break;
+				case Result.ResultTypes.TimeSpan:
+                    switch (right.Type)
+                    {
+                        case Result.ResultTypes.Date:
+                            result = new Result(right.Date.Add(left.TimeSpan));
+                            break;
+                        case Result.ResultTypes.TimeSpan:
+                            result = new Result(left.TimeSpan.Add(right.TimeSpan));
+                            break;
+                        case Result.ResultTypes.Boolean:
+                        case Result.ResultTypes.Number:
+                        case Result.ResultTypes.Text:
+                        case Result.ResultTypes.TextRange:
+                        case Result.ResultTypes.DateRange:
+                        case Result.ResultTypes.NumberRange:
+                        case Result.ResultTypes.TimeSpanRange:
+                        default:
+                            throw new ExpressionEvaluationException("Incompatible operand types.");
+                    }
+                    break;
 				default:
 					throw new ExpressionEvaluationException("Incompatible operand types.");
-			}
-		}
+            }
+        }
 
-		public void visit(NegNode node)
+        public void Visit(NegNode node)
 		{
 			// SEMANTICS:
 			//     - number
 			//     - timespan
 
-			Result operand = Evaluate(node.subExpression);
+			Result operand = Evaluate(node.SubExpression);
 
-			switch (operand.type)
-			{
-				case Result.Type.Number:
-					result = new Result(-operand.number);
-					break;
-				case Result.Type.TimeSpan:
-					result = new Result(-operand.timeSpan);
-					break;
-				case Result.Type.Date:
-					result = new Result(new TimeSpan(-operand.date.Ticks));
-					break;
-				default:
-					throw new Exception("Operator evaluation error: Invalid operand type.");
-			}
-		}
+            switch (operand.Type)
+            {
+                case Result.ResultTypes.Number:
+                    result = new Result(-operand.Number);
+                    break;
+                case Result.ResultTypes.TimeSpan:
+                    result = new Result(-operand.TimeSpan);
+                    break;
+                case Result.ResultTypes.Date:
+                    result = new Result(new TimeSpan(-operand.Date.Ticks));
+                    break;
+                case Result.ResultTypes.Boolean:
+                case Result.ResultTypes.Text:
+                case Result.ResultTypes.TextRange:
+                case Result.ResultTypes.DateRange:
+                case Result.ResultTypes.NumberRange:
+                case Result.ResultTypes.TimeSpanRange:
+                default:
+                    throw new Exception("Operator evaluation error: Invalid operand type.");
+            }
+        }
 
-		public void visit(MulNode node)
+        public void Visit(MulNode node)
 		{
 			// SEMANTICS:
 			//     number * number
 			//     timespan * number
 			//     number * timespan
 
-			Result left = Evaluate(node.left);
-			Result right = Evaluate(node.right);
+			Result left = Evaluate(node.Left);
+			Result right = Evaluate(node.Right);
 
-			switch (left.type)
-			{
-				case Result.Type.Number:
-					switch (right.type)
-					{
-						case Result.Type.Number:
-							result = new Result(left.number * right.number);
-							break;
-						case Result.Type.TimeSpan:
-							result = new Result(new TimeSpan((long)(left.number * right.timeSpan.Ticks)));
-							break;
-						default:
-							throw new Exception("Operator evaluation error: Incompatible operand types.");
-					}
-					break;
-				case Result.Type.TimeSpan:
-					switch (right.type)
-					{
-						case Result.Type.Number:
-							result = new Result(new TimeSpan((long)(left.timeSpan.Ticks * right.number)));
-							break;
-						default:
-							throw new Exception("Operator evaluation error: Incompatible operand types.");
-					}
-					break;
-				default:
-					throw new Exception("Operator evaluation error: Incompatible operand types.");
-			}
-		}
+            switch (left.Type)
+            {
+                case Result.ResultTypes.Number:
+                    switch (right.Type)
+                    {
+                        case Result.ResultTypes.Number:
+                            result = new Result(left.Number * right.Number);
+                            break;
+                        case Result.ResultTypes.TimeSpan:
+                            result = new Result(new TimeSpan((long)(left.Number * right.TimeSpan.Ticks)));
+                            break;
+                        case Result.ResultTypes.Boolean:
+                        case Result.ResultTypes.Date:
+                        case Result.ResultTypes.Text:
+                        case Result.ResultTypes.TextRange:
+                        case Result.ResultTypes.DateRange:
+                        case Result.ResultTypes.NumberRange:
+                        case Result.ResultTypes.TimeSpanRange:
+                        default:
+                            throw new Exception("Operator evaluation error: Incompatible operand types.");
+                    }
+                    break;
+                case Result.ResultTypes.TimeSpan:
+                    switch (right.Type)
+                    {
+                        case Result.ResultTypes.Number:
+                            result = new Result(new TimeSpan((long)(left.TimeSpan.Ticks * right.Number)));
+                            break;
+                        case Result.ResultTypes.Boolean:
+                        case Result.ResultTypes.Date:
+                        case Result.ResultTypes.TimeSpan:
+                        case Result.ResultTypes.Text:
+                        case Result.ResultTypes.TextRange:
+                        case Result.ResultTypes.DateRange:
+                        case Result.ResultTypes.NumberRange:
+                        case Result.ResultTypes.TimeSpanRange:
+                        default:
+                            throw new Exception("Operator evaluation error: Incompatible operand types.");
+                    }
+                    break;
+                case Result.ResultTypes.Boolean:
+                case Result.ResultTypes.Date:
+                case Result.ResultTypes.Text:
+                case Result.ResultTypes.TextRange:
+                case Result.ResultTypes.DateRange:
+                case Result.ResultTypes.NumberRange:
+                case Result.ResultTypes.TimeSpanRange:
+                default:
+                    throw new Exception("Operator evaluation error: Incompatible operand types.");
+            }
+        }
 
-		public void visit(DivNode node)
+        public void Visit(DivNode node)
 		{
 			// SEMANTICS:
 			//     number / number
 			//     timespan / number
 
-			Result left = Evaluate(node.left);
-			Result right = Evaluate(node.right);
+			Result left = Evaluate(node.Left);
+			Result right = Evaluate(node.Right);
 
-			switch (left.type)
+			switch (left.Type)
 			{
-				case Result.Type.Number:
-					if (right.type != Result.Type.Number)
+				case Result.ResultTypes.Number:
+					if (right.Type != Result.ResultTypes.Number)
 						throw new Exception("Operator evaluation error: Incompatible operand types.");
 
-					result = new Result(left.number / right.number);
+					result = new Result(left.Number / right.Number);
 					break;
-				case Result.Type.TimeSpan:
-					if (right.type != Result.Type.Number)
+				case Result.ResultTypes.TimeSpan:
+					if (right.Type != Result.ResultTypes.Number)
 						throw new Exception("Operator evaluation error: Incompatible operand types.");
 
-					result = new Result(new TimeSpan((long)(left.timeSpan.Ticks / right.number)));
+					result = new Result(new TimeSpan((long)(left.TimeSpan.Ticks / right.Number)));
 					break;
 				default:
 					throw new Exception("Operator evaluation error: Incompatible operand types.");
 			}
 		}
 
-		public void visit(NumberNode node)
+		public void Visit(NumberNode node)
 		{
-			result = new Result(node.value);
-		}
-
-		public void visit(TextNode node) {
 			result = new Result(node.Value);
 		}
 
-		public void visit(PowNode node)
+		public void Visit(TextNode node) {
+			result = new Result(node.Value);
+		}
+
+		public void Visit(PowNode node)
 		{
 			// SEMANTICS:
 			//     number ^ number
 			//     timespan ^ number
 
-			Result left = Evaluate(node.powBase);
-			Result right = Evaluate(node.exp);
+			Result left = Evaluate(node.PowBase);
+			Result right = Evaluate(node.Exp);
 
-			switch (left.type)
+			switch (left.Type)
 			{
-				case Result.Type.Number:
-					if (right.type != Result.Type.Number)
+				case Result.ResultTypes.Number:
+					if (right.Type != Result.ResultTypes.Number)
 						throw new ExpressionEvaluationException("Invalid operand types.");
 
-					result = new Result(System.Math.Pow(left.number, right.number));
+					result = new Result(System.Math.Pow(left.Number, right.Number));
 					break;
-				case Result.Type.TimeSpan:
-					if (right.type != Result.Type.Number)
+				case Result.ResultTypes.TimeSpan:
+					if (right.Type != Result.ResultTypes.Number)
 						throw new ExpressionEvaluationException("Invalid operand types.");
 
-					result = new Result(new TimeSpan((long)System.Math.Pow(left.timeSpan.Ticks, right.number)));
+					result = new Result(new TimeSpan((long)System.Math.Pow(left.TimeSpan.Ticks, right.Number)));
 					break;
 				default:
 					throw new ExpressionEvaluationException("Incompatible operand types.");
 			}
 		}
 
-		public void visit(CondExpr node)
+		public void Visit(CondExpr node)
 		{
-			Result condResult = Evaluate(node.condExpr);
+			Result condResult = Evaluate(node.Expression);
 
-			switch (condResult.type)
+			switch (condResult.Type)
 			{
-				case Result.Type.Boolean:
-					result = condResult.boolean
-						? Evaluate(node.thenExpr)
-						: Evaluate(node.elseExpr);
+				case Result.ResultTypes.Boolean:
+					result = condResult.Boolean
+						? Evaluate(node.ThenExpr)
+						: Evaluate(node.ElseExpr);
 					break;
-				case Result.Type.Number:
-					result = condResult.number != 0
-						? Evaluate(node.thenExpr)
-						: Evaluate(node.elseExpr);
+				case Result.ResultTypes.Number:
+					result = condResult.Number != 0
+						? Evaluate(node.ThenExpr)
+						: Evaluate(node.ElseExpr);
 					break;
 				default:
 					throw new ExpressionEvaluationException("Incompatible operand types.");
 			}
 		}
 
-		public void visit(CompareNode compareNode)
+		public void Visit(CompareNode compareNode)
 		{
 			// SEMANTICS:
 			//     number OP number
@@ -754,32 +808,32 @@ namespace Expressionator.Expressions.Evaluator
 			//     RelOp ::= on of: < <= = <> >= >
 			//     BoolOp ::= on of: AND OR XOR
 
-			Result left = Evaluate(compareNode.left);
-			Result right = Evaluate(compareNode.right);
+			Result left = Evaluate(compareNode.Left);
+			Result right = Evaluate(compareNode.Right);
 
-			if (left.type == Result.Type.Text || right.type == Result.Type.Text)
-				switch (compareNode.compare) {
-					case CompareNode.Compare.Equal:
+			if (left.Type == Result.ResultTypes.Text || right.Type == Result.ResultTypes.Text)
+				switch (compareNode.Compare) {
+					case CompareNode.CompareTypes.Equal:
 						result = new Result(String.Compare(left.ToString(), right.ToString(),
 							StringComparison.CurrentCultureIgnoreCase) == 0);
 						return;
-					case CompareNode.Compare.UnEqual:
+					case CompareNode.CompareTypes.UnEqual:
 						result = new Result(String.Compare(left.ToString(), right.ToString(),
 							StringComparison.CurrentCultureIgnoreCase) != 0);
 						return;
-					case CompareNode.Compare.Less:
+					case CompareNode.CompareTypes.Less:
 						result = new Result(String.Compare(left.ToString(), right.ToString(),
 							StringComparison.CurrentCultureIgnoreCase) < 0);
 						return;
-					case CompareNode.Compare.LessEqual:
+					case CompareNode.CompareTypes.LessEqual:
 						result = new Result(String.Compare(left.ToString(), right.ToString(),
 							StringComparison.CurrentCultureIgnoreCase) <= 0);
 						return;
-					case CompareNode.Compare.Greater:
+					case CompareNode.CompareTypes.Greater:
 						result = new Result(String.Compare(left.ToString(), right.ToString(),
 							StringComparison.CurrentCultureIgnoreCase) > 0);
 						return;
-					case CompareNode.Compare.GreaterEqual:
+					case CompareNode.CompareTypes.GreaterEqual:
 						result = new Result(String.Compare(left.ToString(), right.ToString(),
 							StringComparison.CurrentCultureIgnoreCase) >= 0);
 						return;
@@ -787,112 +841,112 @@ namespace Expressionator.Expressions.Evaluator
 						throw new ExpressionEvaluationException("Invalid operation.");
 				}
 
-			if (left.type != right.type)
+			if (left.Type != right.Type)
 				throw new ExpressionEvaluationException("Incompatible types.");
 
-			switch (left.type)
+			switch (left.Type)
 			{
-				case Result.Type.Number:
-					switch (compareNode.compare)
+				case Result.ResultTypes.Number:
+					switch (compareNode.Compare)
 					{
-						case CompareNode.Compare.Less:
-							result = new Result(left.number < right.number);
+						case CompareNode.CompareTypes.Less:
+							result = new Result(left.Number < right.Number);
 							break;
-						case CompareNode.Compare.LessEqual:
-							result = new Result(left.number <= right.number);
+						case CompareNode.CompareTypes.LessEqual:
+							result = new Result(left.Number <= right.Number);
 							break;
-						case CompareNode.Compare.Equal:
-							result = new Result(left.number == right.number);
+						case CompareNode.CompareTypes.Equal:
+							result = new Result(left.Number == right.Number);
 							break;
-						case CompareNode.Compare.UnEqual:
-							result = new Result(left.number != right.number);
+						case CompareNode.CompareTypes.UnEqual:
+							result = new Result(left.Number != right.Number);
 							break;
-						case CompareNode.Compare.GreaterEqual:
-							result = new Result(left.number >= right.number);
+						case CompareNode.CompareTypes.GreaterEqual:
+							result = new Result(left.Number >= right.Number);
 							break;
-						case CompareNode.Compare.Greater:
-							result = new Result(left.number > right.number);
+						case CompareNode.CompareTypes.Greater:
+							result = new Result(left.Number > right.Number);
 							break;
-						case CompareNode.Compare.And:
-							result = new Result(left.number != 0 && right.number != 0);
+						case CompareNode.CompareTypes.And:
+							result = new Result(left.Number != 0 && right.Number != 0);
 							break;
-						case CompareNode.Compare.Or:
-							result = new Result(left.number != 0 || right.number != 0);
+						case CompareNode.CompareTypes.Or:
+							result = new Result(left.Number != 0 || right.Number != 0);
 							break;
-						case CompareNode.Compare.XOr:
-							result = new Result(left.number != 0 ^ right.number != 0);
+						case CompareNode.CompareTypes.XOr:
+							result = new Result(left.Number != 0 ^ right.Number != 0);
 							break;
 						default:
 							throw new ExpressionEvaluationException("Invalid operation.");
 					}
 					break;
-				case Result.Type.Date:
-					switch (compareNode.compare)
+				case Result.ResultTypes.Date:
+					switch (compareNode.Compare)
 					{
-						case CompareNode.Compare.Less:
-							result = new Result(left.date < right.date);
+						case CompareNode.CompareTypes.Less:
+							result = new Result(left.Date < right.Date);
 							break;
-						case CompareNode.Compare.LessEqual:
-							result = new Result(left.date <= right.date);
+						case CompareNode.CompareTypes.LessEqual:
+							result = new Result(left.Date <= right.Date);
 							break;
-						case CompareNode.Compare.Equal:
-							result = new Result(left.date == right.date);
+						case CompareNode.CompareTypes.Equal:
+							result = new Result(left.Date == right.Date);
 							break;
-						case CompareNode.Compare.UnEqual:
-							result = new Result(left.date != right.date);
+						case CompareNode.CompareTypes.UnEqual:
+							result = new Result(left.Date != right.Date);
 							break;
-						case CompareNode.Compare.GreaterEqual:
-							result = new Result(left.date >= right.date);
+						case CompareNode.CompareTypes.GreaterEqual:
+							result = new Result(left.Date >= right.Date);
 							break;
-						case CompareNode.Compare.Greater:
-							result = new Result(left.date > right.date);
+						case CompareNode.CompareTypes.Greater:
+							result = new Result(left.Date > right.Date);
 							break;
 						default:
 							throw new ExpressionEvaluationException("Invalid operation.");
 					}
 					break;
-				case Result.Type.TimeSpan:
-					switch (compareNode.compare)
+				case Result.ResultTypes.TimeSpan:
+					switch (compareNode.Compare)
 					{
-						case CompareNode.Compare.Less:
-							result = new Result(left.timeSpan < right.timeSpan);
+						case CompareNode.CompareTypes.Less:
+							result = new Result(left.TimeSpan < right.TimeSpan);
 							break;
-						case CompareNode.Compare.LessEqual:
-							result = new Result(left.timeSpan <= right.timeSpan);
+						case CompareNode.CompareTypes.LessEqual:
+							result = new Result(left.TimeSpan <= right.TimeSpan);
 							break;
-						case CompareNode.Compare.Equal:
-							result = new Result(left.timeSpan == right.timeSpan);
+						case CompareNode.CompareTypes.Equal:
+							result = new Result(left.TimeSpan == right.TimeSpan);
 							break;
-						case CompareNode.Compare.UnEqual:
-							result = new Result(left.timeSpan != right.timeSpan);
+						case CompareNode.CompareTypes.UnEqual:
+							result = new Result(left.TimeSpan != right.TimeSpan);
 							break;
-						case CompareNode.Compare.GreaterEqual:
-							result = new Result(left.timeSpan >= right.timeSpan);
+						case CompareNode.CompareTypes.GreaterEqual:
+							result = new Result(left.TimeSpan >= right.TimeSpan);
 							break;
-						case CompareNode.Compare.Greater:
-							result = new Result(left.timeSpan > right.timeSpan);
+						case CompareNode.CompareTypes.Greater:
+							result = new Result(left.TimeSpan > right.TimeSpan);
 							break;
 						default:
 							throw new ExpressionEvaluationException("Invalid operation.");
 					}
 					break;
-				case Result.Type.Boolean:
-					switch (compareNode.compare)
+				case Result.ResultTypes.Boolean:
+					switch (compareNode.Compare)
 					{
-						case CompareNode.Compare.And:
-							result = new Result(left.boolean && right.boolean);
+						case CompareNode.CompareTypes.And:
+							result = new Result(left.Boolean && right.Boolean);
 							break;
-						case CompareNode.Compare.Or:
-							result = new Result(left.boolean || right.boolean);
+						case CompareNode.CompareTypes.Or:
+							result = new Result(left.Boolean || right.Boolean);
 							break;
-						case CompareNode.Compare.XOr:
-							result = new Result(left.boolean ^ right.boolean);
+						case CompareNode.CompareTypes.XOr:
+							result = new Result(left.Boolean ^ right.Boolean);
 							break;
-						case CompareNode.Compare.Equal:
-							result = new Result(left.boolean == right.boolean);
+						case CompareNode.CompareTypes.Equal:
+							result = new Result(left.Boolean == right.Boolean);
 							break;
-						case CompareNode.Compare.UnEqual:
-							result = new Result(left.boolean != right.boolean);
+						case CompareNode.CompareTypes.UnEqual:
+							result = new Result(left.Boolean != right.Boolean);
 							break;
 						default:
 							throw new ExpressionEvaluationException("Invalid operation.");
@@ -903,152 +957,152 @@ namespace Expressionator.Expressions.Evaluator
 			}
 		}
 
-		public void visit(VariableNode variableNode)
+		public void Visit(VariableNode variableNode)
 		{
 			if (evaluateVariable == null || evaluateVariable.GetInvocationList().Length == 0)
-				throw new Exception("Cannot resolve symbol: '" + variableNode.name + "'");
+				throw new Exception("Cannot resolve symbol: '" + variableNode.Name + "'");
 
 			result = evaluateVariable(variableNode);
 		}
 
-		public void visit(RangeNode rangeNode)
+		public void Visit(RangeNode rangeNode)
 		{
-			Result low = Evaluate(rangeNode.low);
-			Result high = Evaluate(rangeNode.high);
+			Result low = Evaluate(rangeNode.Low);
+			Result high = Evaluate(rangeNode.High);
 
-			if (low.type != high.type)
+			if (low.Type != high.Type)
 				throw new Exception("Evaluation error: Cannot handle range set components of different type.");
 
-			switch (low.type)
+			switch (low.Type)
 			{
-				case Result.Type.Boolean:
-					result = new Result(low.boolean ? 1 : 0, high.boolean ? 1 : 0);
+				case Result.ResultTypes.Boolean:
+					result = new Result(low.Boolean ? 1 : 0, high.Boolean ? 1 : 0);
 					break;
-				case Result.Type.Date:
-					result = new Result(new DateRange(low.date, high.date));
+				case Result.ResultTypes.Date:
+					result = new Result(new DateRange(low.Date, high.Date));
 					break;
-				case Result.Type.DateRange:
+				case Result.ResultTypes.DateRange:
 					throw new Exception("Illegal evaluation: Cannot evaluate the range of two number range sets into a single range set.");
-				case Result.Type.Number:
-					result = new Result(low.number, high.number);
+				case Result.ResultTypes.Number:
+					result = new Result(low.Number, high.Number);
 					break;
-				case Result.Type.NumberRange:
+				case Result.ResultTypes.NumberRange:
 					throw new Exception("Illegal evaluation: Cannot evaluate the range of two number range sets into a single range set.");
-				case Result.Type.TimeSpan:
-					result = new Result(low.timeSpan, high.timeSpan);
+				case Result.ResultTypes.TimeSpan:
+					result = new Result(low.TimeSpan, high.TimeSpan);
 					break;
-				case Result.Type.TimeSpanRange:
+				case Result.ResultTypes.TimeSpanRange:
 					throw new Exception("Illegal evaluation: Cannot evaluate the range of two number range sets into a single range set.");
 				default:
 					throw new Exception("Internal error: unhandled enum value.");
 			}
 		}
 
-		public void visit(ContainsNode contains)
+		public void Visit(ContainsNode contains)
 		{
-			Result test = Evaluate(contains.test);
+			Result test = Evaluate(contains.Test);
 
-			Result range = Evaluate(contains.range);
+			Result range = Evaluate(contains.Range);
 
-			switch (test.type)
+			switch (test.Type)
 			{
-				case Result.Type.Boolean:
+				case Result.ResultTypes.Boolean:
 					throw new Exception("Unsupported range bound test.");
-				case Result.Type.Date:
-					if (range.type == Result.Type.DateRange)
-						result = new Result(range.dateRange.Contains(test.date));
+				case Result.ResultTypes.Date:
+					if (range.Type == Result.ResultTypes.DateRange)
+						result = new Result(range.DateRange.Contains(test.Date));
 					else
 						throw new Exception("Expected a date range.");
 					break;
-				case Result.Type.DateRange:
+				case Result.ResultTypes.DateRange:
 					throw new Exception("Unsupported range bound test.");
 
-                case Result.Type.Text:
-                    if (range.type == Result.Type.TextRange)
-                        result = new Result(range.text.Contains(test.text));
+                case Result.ResultTypes.Text:
+                    if (range.Type == Result.ResultTypes.TextRange)
+                        result = new Result(range.Text.Contains(test.Text));
                     else
                         throw new Exception("Expected a number range.");
                     break;
 		
-				case Result.Type.Number:
-					if (range.type == Result.Type.NumberRange)
-						result = new Result(range.numberRange.Contains(test.number));
+				case Result.ResultTypes.Number:
+					if (range.Type == Result.ResultTypes.NumberRange)
+						result = new Result(range.NumberRange.Contains(test.Number));
 					else
 						throw new Exception("Expected a number range.");
 					break;
-				case Result.Type.NumberRange:
+				case Result.ResultTypes.NumberRange:
 					throw new Exception("Unsuppported range bound test.");
-				case Result.Type.TimeSpan:
-					if (range.type == Result.Type.TimeSpanRange)
+				case Result.ResultTypes.TimeSpan:
+					if (range.Type == Result.ResultTypes.TimeSpanRange)
 						result = new Result(
-							range.timeSpanRange.Key.Ticks <= test.timeSpan.Ticks && test.timeSpan.Ticks <= range.timeSpanRange.Value.Ticks
+							range.TimeSpanRange.Key.Ticks <= test.TimeSpan.Ticks && test.TimeSpan.Ticks <= range.TimeSpanRange.Value.Ticks
 						);
 					else
 						throw new Exception("Expected a timespan range.");
 					break;
-				case Result.Type.TimeSpanRange:
+				case Result.ResultTypes.TimeSpanRange:
 					throw new Exception("Unsupported range bound test.");
 				default:
 					throw new Exception("Internal Error: unhandled enum value.");
 			}
 		}
 
-		public void visit(DateExpr date)
+		public void Visit(DateExpr date)
 		{
-			result = new Result(date.date);
+			result = new Result(date.Date);
 		}
 
 		// TODO: rename DateCastExpr to TimeSpanCast maybe?
-		public void visit(DateCastExpr dateCast)
+		public void Visit(DateCastExpr dateCast)
 		{
 			// SEMANTICS:
 			//     DATE_CAST(number): TIMESPAN
 
-			Result number = Evaluate(dateCast.subExpression);
+			Result number = Evaluate(dateCast.SubExpression);
 
-			if (number.type != Result.Type.Number)
+			if (number.Type != Result.ResultTypes.Number)
 				throw new ExpressionEvaluationException("Illegal date cast.");
 
-			switch (dateCast.unit)
+			switch (dateCast.Unit)
 			{
-				case DateCastExpr.Unit.Year:
+				case DateCastExpr.Units.Year:
 					throw new ExpressionEvaluationException("The result would be inaccurate.");
-				case DateCastExpr.Unit.Month:
+				case DateCastExpr.Units.Month:
 					throw new ExpressionEvaluationException("The result would be inaccurate.");
-				case DateCastExpr.Unit.Day:
-					result = new Result(new TimeSpan((long)(number.number * TimeSpan.FromDays(1).Ticks)));
+				case DateCastExpr.Units.Day:
+					result = new Result(new TimeSpan((long)(number.Number * TimeSpan.FromDays(1).Ticks)));
 					break;
 				default:
 					throw new Exception("Internal conversion error: unhandled type.");
 			}
 		}
 
-		public void visit(DateQualExpr dateQual)
+		public void Visit(DateQualExpr dateQual)
 		{
 			// SEMANTICS:
 			//     DATE.QUAL: NUMBER
 
-			Result dateResult = Evaluate(dateQual.expression);
-			if (dateResult.type != Result.Type.Date)
+			Result dateResult = Evaluate(dateQual.Expression);
+			if (dateResult.Type != Result.ResultTypes.Date)
 				throw new Exception("Date qualifier expected a date expression to qualify. But got something else.");
 
-			switch (dateQual.qual)
+			switch (dateQual.Qual)
 			{
-				case DateQualExpr.Qual.Day:
-					result = new Result((double)dateResult.date.Day);
+				case DateQualExpr.Quals.Day:
+					result = new Result((double)dateResult.Date.Day);
 					break;
-				case DateQualExpr.Qual.Month:
-					result = new Result((double)dateResult.date.Month);
+				case DateQualExpr.Quals.Month:
+					result = new Result((double)dateResult.Date.Month);
 					break;
-				case DateQualExpr.Qual.Year:
-					result = new Result((double)dateResult.date.Year);
+				case DateQualExpr.Quals.Year:
+					result = new Result((double)dateResult.Date.Year);
 					break;
 				default:
 					throw new ExpressionEvaluationException("Invalid date qualification.");
 			}
 		}
 
-		public void visit(TimeSpanCastExpr timeSpan)
+		public void Visit(TimeSpanCastExpr timeSpan)
 		{
 			// SEMANTICS:
 			//     TIMESPAN(number) ==> results in TIMESPAN
@@ -1056,57 +1110,57 @@ namespace Expressionator.Expressions.Evaluator
 			//     TIMESPAN(date .. date) ==> results in NUMBER
 			//     TIMESPAN(date - date) ==> results in NUMBER
 
-			result = Evaluate(timeSpan.timeSpan);
+			result = Evaluate(timeSpan.TimeSpan);
 
-			switch (result.type)
+			switch (result.Type)
 			{
-				case Result.Type.Number:
-					switch (timeSpan.unit)
+				case Result.ResultTypes.Number:
+					switch (timeSpan.Unit)
 					{
-						case TimeSpanCastExpr.Unit.Day:
-							result = new Result(TimeSpan.FromDays(result.number));
+						case TimeSpanCastExpr.Units.Day:
+							result = new Result(TimeSpan.FromDays(result.Number));
 							break;
-						case TimeSpanCastExpr.Unit.Month:
-							result = new Result(TimeSpan.FromDays(result.number * 30));
+						case TimeSpanCastExpr.Units.Month:
+							result = new Result(TimeSpan.FromDays(result.Number * 30));
 							break;
 //							throw new ExpressionEvaluationException("The result would be inaccurate.");
-						case TimeSpanCastExpr.Unit.Year:
-							result = new Result(TimeSpan.FromDays(result.number * 365));
+						case TimeSpanCastExpr.Units.Year:
+							result = new Result(TimeSpan.FromDays(result.Number * 365));
 							break;
 //							throw new ExpressionEvaluationException("The result would be inaccurate.");
 						default:
 							throw new Exception("Internal error: Unhandled enum value.");
 					}
 					break;
-				case Result.Type.TimeSpan:
-					switch (timeSpan.unit)
+				case Result.ResultTypes.TimeSpan:
+					switch (timeSpan.Unit)
 					{
-						case TimeSpanCastExpr.Unit.Day:
-							result = new Result(result.timeSpan.TotalDays);
+						case TimeSpanCastExpr.Units.Day:
+							result = new Result(result.TimeSpan.TotalDays);
 							break;
-						case TimeSpanCastExpr.Unit.Month:
-							result = new Result(result.timeSpan.TotalDays / 30);
+						case TimeSpanCastExpr.Units.Month:
+							result = new Result(result.TimeSpan.TotalDays / 30);
 							break;
 //							throw new ExpressionEvaluationException("The result would be inaccurate.");
-						case TimeSpanCastExpr.Unit.Year:
-							result = new Result(result.timeSpan.TotalDays / 365);
+						case TimeSpanCastExpr.Units.Year:
+							result = new Result(result.TimeSpan.TotalDays / 365);
 							break;
 //							throw new ExpressionEvaluationException("The result would be inaccurate.");
 						default:
 							throw new Exception("Internal error: Unhandled enum value.");
 					}
 					break;
-				case Result.Type.DateRange:
-					switch (timeSpan.unit)
+				case Result.ResultTypes.DateRange:
+					switch (timeSpan.Unit)
 					{
-						case TimeSpanCastExpr.Unit.Day:
-							result = new Result(result.dateRange.TotalDays);
+						case TimeSpanCastExpr.Units.Day:
+							result = new Result(result.DateRange.TotalDays);
 							break;
-						case TimeSpanCastExpr.Unit.Month:
-							result = new Result(result.dateRange.TotalMonths);
+						case TimeSpanCastExpr.Units.Month:
+							result = new Result(result.DateRange.TotalMonths);
 							break;
-						case TimeSpanCastExpr.Unit.Year:
-							result = new Result(result.dateRange.TotalYears);
+						case TimeSpanCastExpr.Units.Year:
+							result = new Result(result.DateRange.TotalYears);
 							break;
 						default:
 							throw new Exception("Internal error: Unhandled enum value.");
@@ -1117,27 +1171,17 @@ namespace Expressionator.Expressions.Evaluator
 			}
 		}
 
-		public void visit(RoundCastExpr roundCast)
+		public void Visit(RoundCastExpr roundCast)
 		{
-			result = Evaluate(roundCast.expression);
+			result = Evaluate(roundCast.Expression);
 
-			if (result.type != Result.Type.Number)
+			if (result.Type != Result.ResultTypes.Number)
 				throw new ExpressionEvaluationException("Invalid cast.");
 
-			result = new Result(System.Math.Round(result.number, roundCast.decimals));
+			result = new Result(System.Math.Round(result.Number, roundCast.Decimals));
 		}
-		#endregion
+        #endregion
 
-		#region helper methods
-		private bool toBool(double v)
-		{
-			return v != 0.0;
-		}
 
-		private double toResult(bool v)
-		{
-			return v ? 1.0 : 0.0;
-		}
-		#endregion
-	}
+    }
 }

@@ -9,9 +9,9 @@ namespace Expressionator.Expressions
 	/// </summary>
 	public class NumberNode : Node
 	{
-		private double _value;
+		private  double _value;
 
-		public double value
+		public double Value
 		{
 			get
 			{
@@ -19,7 +19,7 @@ namespace Expressionator.Expressions
 			}
 			set
 			{
-				this.value = value;
+                _value = value;
 			}
 		}
 
@@ -28,9 +28,9 @@ namespace Expressionator.Expressions
 			_value = value;
 		}
 
-		public override void accept(INodeVisitor visitor)
+		public override void Accept(INodeVisitor visitor)
 		{
-			visitor.visit(this);
+			visitor.Visit(this);
 		}
 	}
 }

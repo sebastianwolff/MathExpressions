@@ -7,12 +7,12 @@ namespace Expressionator.Utils
 	/// </summary>
 	public sealed class DateRange : IEquatable<DateRange>
 	{
-		private DateTime FBegin;
-		private DateTime FEnd;
-		private TimeSpan FTimeSpan;
+		private readonly DateTime _begin;
+		private readonly DateTime _end;
+		private readonly TimeSpan _timeSpan;
 
 		#region helper
-		private static double daysInMonth(DateTime dt)
+		private static double DaysInMonth(DateTime dt)
 		{
 			return DateTime.DaysInMonth(dt.Year, dt.Month);
 		}
@@ -21,42 +21,42 @@ namespace Expressionator.Utils
 		#region Properties
 		public DateTime Begin
 		{
-			get { return FBegin.Date; }
+			get { return _begin.Date; }
 		}
 
 		public DateTime End
 		{
-			get { return FEnd.Date; }
+			get { return _end.Date; }
 		}
 
 		public TimeSpan TimeSpan
 		{
-			get { return FTimeSpan; }
+			get { return _timeSpan; }
 		}
 
 		public long Ticks
 		{
-			get { return FTimeSpan.Ticks; }
+			get { return _timeSpan.Ticks; }
 		}
 
 		public double TotalDays
 		{
-			get { return FTimeSpan.TotalDays; }
+			get { return _timeSpan.TotalDays; }
 		}
 
 		public double TotalMonths
 		{
 			get
 			{
-				return FBegin.Year == FEnd.Year && FBegin.Month == FEnd.Month
-					? (FEnd.Day - FBegin.Day + 1) / daysInMonth(FBegin)
-					: (daysInMonth(FBegin) - FBegin.Day + 1) / daysInMonth(FBegin)
-						+ (FBegin.Year == FEnd.Year
-							? FEnd.Day / daysInMonth(FEnd) + (FEnd.Month - FBegin.Month - 1)
-							: (12 - FBegin.Month)
-								+ 12 * System.Math.Max((FEnd.Year - FBegin.Year - 1), 0)
-								+ System.Math.Max(FEnd.Month - 1, 0)
-								+ FEnd.Day / daysInMonth(FEnd));
+				return _begin.Year == _end.Year && _begin.Month == _end.Month
+					? (_end.Day - _begin.Day + 1) / DaysInMonth(_begin)
+					: (DaysInMonth(_begin) - _begin.Day + 1) / DaysInMonth(_begin)
+						+ (_begin.Year == _end.Year
+							? _end.Day / DaysInMonth(_end) + (_end.Month - _begin.Month - 1)
+							: (12 - _begin.Month)
+								+ 12 * System.Math.Max((_end.Year - _begin.Year - 1), 0)
+								+ System.Math.Max(_end.Month - 1, 0)
+								+ _end.Day / DaysInMonth(_end));
 			}
 		}
 
@@ -71,33 +71,32 @@ namespace Expressionator.Utils
 			if (ABegin > AEnd)
 				throw new ArgumentException("DateSpan's begin must be BEFORE the end date.");
 
-			FBegin = ABegin;
-			FEnd = AEnd;
-			FTimeSpan = FEnd - FBegin;
+			_begin = ABegin;
+			_end = AEnd;
+			_timeSpan = _end - _begin;
 		}
 
 		public bool Contains(DateTime AValue)
 		{
-			return FBegin <= AValue && AValue <= FEnd;
+			return _begin <= AValue && AValue <= _end;
 		}
 
 		public override bool Equals(object obj)
 		{
-			DateRange dr = obj as DateRange;
-			return dr != null ? Equals(dr) : false;
-		}
+            return obj is DateRange dr && Equals(dr);
+        }
 
 		public bool Equals(DateRange AValue)
 		{
 			if (AValue == null)
-				throw new ArgumentNullException("AValue");
+				throw new ArgumentNullException(nameof(AValue));
 
-			return FBegin == AValue.Begin && FEnd == AValue.End;
+			return _begin == AValue.Begin && _end == AValue.End;
 		}
 
 		public override int GetHashCode()
 		{
-			return FBegin.GetHashCode() ^ FEnd.GetHashCode();
+			return _begin.GetHashCode() ^ _end.GetHashCode();
 		}
 
 		public static bool Intersects(DateRange AValue)
@@ -108,7 +107,7 @@ namespace Expressionator.Utils
 
 		public override string ToString()
 		{
-			return String.Format("DATE({0})..DATE({1})", FBegin, FEnd);
+			return String.Format("DATE({0})..DATE({1})", _begin, _end);
 		}
 	}
 }

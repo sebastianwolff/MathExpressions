@@ -6,17 +6,17 @@ namespace Expressionator.Expressions
 {
 	public class DateQualExpr : Node
 	{
-		public enum Qual
+		public enum Quals
 		{
 			Year,
 			Month,
 			Day
 		}
 
-		private Qual _qual;
-		private Node _expression;
+		private readonly Quals _qual;
+		private readonly Node _expression;
 
-		public Qual qual
+		public Quals Qual
 		{
 			get
 			{
@@ -24,7 +24,7 @@ namespace Expressionator.Expressions
 			}
 		}
 
-		public Node expression
+		public Node Expression
 		{
 			get
 			{
@@ -32,15 +32,15 @@ namespace Expressionator.Expressions
 			}
 		}
 
-		public DateQualExpr(Qual qual, Node expression)
+		public DateQualExpr(Quals qual, Node expression)
 		{
 			_qual = qual;
 			_expression = expression;
 		}
 
-		public override void accept(INodeVisitor visitor)
+		public override void Accept(INodeVisitor visitor)
 		{
-			visitor.visit(this);
+			visitor.Visit(this);
 		}
 	}
 }

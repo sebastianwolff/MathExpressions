@@ -4,13 +4,13 @@ namespace Expressionator.Utils
 {
 	public sealed class NumberRange<T> where T : IEquatable<T>, IComparable<T>
 	{
-		private T FMin;
-		private T FMax;
+		private readonly T _min;
+		private readonly T _max;
 
 		public NumberRange(T AMin, T AMax)
 		{
-			FMin = AMin;
-			FMax = AMax;
+			_min = AMin;
+			_max = AMax;
 		}
 
 		public bool Contains(T value)
@@ -20,19 +20,18 @@ namespace Expressionator.Utils
 
 		public T Min
 		{
-			get { return FMin; }
+			get { return _min; }
 		}
 
 		public T Max
 		{
-			get { return FMax; }
+			get { return _max; }
 		}
 
 		public override bool Equals(object obj)
 		{
-			NumberRange<T> nr = obj as NumberRange<T>;
-			return nr != null ? Equals(nr) : false;
-		}
+            return obj is NumberRange<T> nr && Equals(nr);
+        }
 
 		public bool Equals(NumberRange<T> ANumberRange)
 		{

@@ -6,17 +6,17 @@ namespace Expressionator.Expressions
 {
 	public class DateCastExpr : Node
 	{
-		public enum Unit
+		public enum Units
 		{
 			Day,
 			Month,
 			Year
 		}
 
-		private Node _subExpression;
-		private Unit _unit;
+		private readonly Node _subExpression;
+		private readonly Units _unit;
 
-		public Node subExpression
+		public Node SubExpression
 		{
 			get
 			{
@@ -24,7 +24,7 @@ namespace Expressionator.Expressions
 			}
 		}
 
-		public Unit unit
+		public Units Unit
 		{
 			get
 			{
@@ -32,15 +32,15 @@ namespace Expressionator.Expressions
 			}
 		}
 
-		public DateCastExpr(Node subExpression, Unit unit)
+		public DateCastExpr(Node subExpression, Units unit)
 		{
 			_subExpression = subExpression;
 			_unit = unit;
 		}
 
-		public override void accept(INodeVisitor visitor)
+		public override void Accept(INodeVisitor visitor)
 		{
-			visitor.visit(this);
+			visitor.Visit(this);
 		}
 	}
 }

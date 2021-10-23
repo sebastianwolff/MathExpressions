@@ -2,22 +2,22 @@ namespace Expressionator.Expressions
 {
 	public interface INodeVisitor
 	{
-		void visit(AddNode node);
-		void visit(NegNode node);
-		void visit(MulNode node);
-		void visit(DivNode node);
-		void visit(NumberNode node);
-		void visit(PowNode node);
-		void visit(CondExpr node);
-		void visit(CompareNode node);
-		void visit(VariableNode node);
-		void visit(RangeNode node);
-		void visit(ContainsNode node);
-		void visit(DateExpr node);
-		void visit(DateCastExpr node);
-		void visit(DateQualExpr node);
-		void visit(TimeSpanCastExpr node);
-		void visit(RoundCastExpr node);
-		void visit(TextNode node);
+		void Visit(AddNode node);
+		void Visit(NegNode node);
+		void Visit(MulNode node);
+		void Visit(DivNode node);
+		void Visit(NumberNode node);
+		void Visit(PowNode node);
+		void Visit(CondExpr node);
+		void Visit(CompareNode node);
+		void Visit(VariableNode node);
+		void Visit(RangeNode node);
+		void Visit(ContainsNode node);
+		void Visit(DateExpr node);
+		void Visit(DateCastExpr node);
+		void Visit(DateQualExpr node);
+		void Visit(TimeSpanCastExpr node);
+		void Visit(RoundCastExpr node);
+		void Visit(TextNode node);
 	}
 }

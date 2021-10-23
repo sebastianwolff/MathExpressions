@@ -6,9 +6,9 @@ namespace Expressionator.Expressions
 {
 	public abstract class SymbolNode : Node
 	{
-		private string _name;
+		private readonly string _name;
 
-		public string name
+		public string Name
 		{
 			get
 			{

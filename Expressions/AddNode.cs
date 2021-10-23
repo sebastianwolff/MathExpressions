@@ -10,7 +10,7 @@ namespace Expressionator.Expressions
 		private Node _right;
 
 		#region property accessors
-		public Node left
+		public Node Left
 		{
 			get
 			{
@@ -18,7 +18,7 @@ namespace Expressionator.Expressions
 			}
 		}
 
-		public Node right
+		public Node Right
 		{
 			get
 			{
@@ -45,9 +45,9 @@ namespace Expressionator.Expressions
 			_right = null;
 		}
 
-		public override void accept(INodeVisitor nodeVisitor)
+		public override void Accept(INodeVisitor nodeVisitor)
 		{
-			nodeVisitor.visit(this);
+			nodeVisitor.Visit(this);
 		}
 	}
 }

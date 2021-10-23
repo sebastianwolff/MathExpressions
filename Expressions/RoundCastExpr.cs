@@ -6,10 +6,10 @@ namespace Expressionator.Expressions
 {
 	public class RoundCastExpr : Node
 	{
-		private int _decimals;
-		private Node _expression;
+		private readonly int _decimals;
+		private readonly Node _expression;
 
-		public int decimals
+		public int Decimals
 		{
 			get
 			{
@@ -17,7 +17,7 @@ namespace Expressionator.Expressions
 			}
 		}
 
-		public Node expression
+		public Node Expression
 		{
 			get
 			{
@@ -31,9 +31,9 @@ namespace Expressionator.Expressions
 			_expression = expression;
 		}
 
-		public override void accept(INodeVisitor visitor)
+		public override void Accept(INodeVisitor visitor)
 		{
-			visitor.visit(this);
+			visitor.Visit(this);
 		}
 	}
 }

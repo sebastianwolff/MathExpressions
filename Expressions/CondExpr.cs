@@ -6,26 +6,26 @@ namespace Expressionator.Expressions
 {
 	public class CondExpr : Node
 	{
-		private Node _condExpr;
-		private Node _thenExpr;
-		private Node _elseExpr;
+		private readonly Node _condExpr;
+		private readonly Node _thenExpr;
+		private readonly Node _elseExpr;
 
 		#region attribute accessors
-		public Node condExpr
+		public Node Expression
 		{
 			get
 			{
 				return _condExpr;
 			}
 		}
-		public Node thenExpr
+		public Node ThenExpr
 		{
 			get
 			{
 				return _thenExpr;
 			}
 		}
-		public Node elseExpr
+		public Node ElseExpr
 		{
 			get
 			{
@@ -41,9 +41,9 @@ namespace Expressionator.Expressions
 			_elseExpr = elseExpr;
 		}
 
-		public override void accept(INodeVisitor visitor)
+		public override void Accept(INodeVisitor visitor)
 		{
-			visitor.visit(this);
+			visitor.Visit(this);
 		}
 }
 }

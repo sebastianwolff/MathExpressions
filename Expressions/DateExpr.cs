@@ -6,9 +6,9 @@ namespace Expressionator.Expressions
 {
 	public class DateExpr : Node
 	{
-		DateTime _date;
+        readonly DateTime _date;
 
-		public DateTime date
+		public DateTime Date
 		{
 			get
 			{
@@ -21,9 +21,9 @@ namespace Expressionator.Expressions
 			_date = date.Date;
 		}
 
-		public override void accept(INodeVisitor visitor)
+		public override void Accept(INodeVisitor visitor)
 		{
-			visitor.visit(this);
+			visitor.Visit(this);
 		}
 }
 }

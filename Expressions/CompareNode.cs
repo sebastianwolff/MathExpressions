@@ -6,7 +6,7 @@ namespace Expressionator.Expressions
 {
 	public class CompareNode : Node
 	{
-		public enum Compare
+		public enum CompareTypes
 		{
 			Less,
 			LessEqual,
@@ -20,44 +20,44 @@ namespace Expressionator.Expressions
 			XOr
 		}
 
-		Node _left;
-		Node _right;
-		Compare _compare;
+        readonly Node _left;
+        readonly Node _right;
+        readonly CompareTypes _compareType;
 
 		#region public attribute accessors
-		public Node left
+		public Node Left
 		{
 			get
 			{
 				return _left;
 			}
 		}
-		public Node right
+		public Node Right
 		{
 			get
 			{
 				return _right;
 			}
 		}
-		public Compare compare
+		public CompareTypes Compare
 		{
 			get
 			{
-				return _compare;
+				return _compareType;
 			}
 		}
 		#endregion
 
-		public CompareNode(Compare compare, Node left, Node right)
+		public CompareNode(CompareTypes compare, Node left, Node right)
 		{
-			_compare = compare;
+			_compareType = compare;
 			_left = left;
 			_right = right;
 		}
 
-		public override void accept(INodeVisitor visitor)
+		public override void Accept(INodeVisitor visitor)
 		{
-			visitor.visit(this);
+			visitor.Visit(this);
 		}
 }
 }

@@ -8,7 +8,7 @@ namespace Expressionator.Expressions
 	{
 		private Node _subExpression;
 
-		public Node subExpression
+		public Node SubExpression
 		{
 			get
 			{
@@ -26,9 +26,9 @@ namespace Expressionator.Expressions
 			_subExpression = null;
 		}
 
-		public override void accept(INodeVisitor visitor)
+		public override void Accept(INodeVisitor visitor)
 		{
-			visitor.visit(this);
+			visitor.Visit(this);
 		}
 	}
 }

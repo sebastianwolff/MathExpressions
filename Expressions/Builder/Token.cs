@@ -50,17 +50,17 @@ namespace Expressionator.Expressions.Builder
 			Pow
 		}
 
-		private Type _type;
-		private TypeCode _typeCode;
-		private string _stringValue;
-		private double _numberValue;
-		private DateTime _dateValue;
+		private readonly Type _type;
+		private readonly TypeCode _typeCode;
+		private readonly string _stringValue;
+		private readonly double _numberValue;
+		private readonly DateTime _dateValue;
 
-		private int _line;
-		private int _column;
+		private readonly int _line;
+		private readonly int _column;
 
 		#region public attribut accessors
-		public Type type
+		public Type TokenType
 		{
 			get
 			{
@@ -68,7 +68,7 @@ namespace Expressionator.Expressions.Builder
 			}
 		}
 
-		public TypeCode typeCode
+		public TypeCode TypeCode
 		{
 			get
 			{
@@ -76,7 +76,7 @@ namespace Expressionator.Expressions.Builder
 			}
 		}
 
-		public string stringValue
+		public string StringValue
 		{
 			get
 			{
@@ -84,7 +84,7 @@ namespace Expressionator.Expressions.Builder
 			}
 		}
 
-		public double numberValue
+		public double NumberValue
 		{
 			get
 			{
@@ -92,7 +92,7 @@ namespace Expressionator.Expressions.Builder
 			}
 		}
 
-		public DateTime dateValue
+		public DateTime DateValue
 		{
 			get
 			{
@@ -100,7 +100,7 @@ namespace Expressionator.Expressions.Builder
 			}
 		}
 
-		public int line
+		public int Line
 		{
 			get
 			{
@@ -108,7 +108,7 @@ namespace Expressionator.Expressions.Builder
 			}
 		}
 
-		public int column
+		public int Column
 		{
 			get
 			{
@@ -134,7 +134,7 @@ namespace Expressionator.Expressions.Builder
 		public Token(Type type, int line, int column)
 		{
 			_type = type;
-			_stringValue = type2Str(type);
+			_stringValue = Type2Str(type);
 
 			_line = line;
 			_column = column;
@@ -213,7 +213,7 @@ namespace Expressionator.Expressions.Builder
 			_column = column;
 		}
 
-		private string type2Str(Type type)
+		private static string Type2Str(Type type)
 		{
 			switch (type)
 			{
@@ -288,13 +288,13 @@ namespace Expressionator.Expressions.Builder
 
 		public override string ToString()
 		{
-			switch (type)
+			switch (TokenType)
 			{
 				case Type.Symbol:
 				case Type.Number:
-					return stringValue;
+					return StringValue;
 				default:
-					return type2Str(type);
+					return Type2Str(TokenType);
 			}
 		}
 	}

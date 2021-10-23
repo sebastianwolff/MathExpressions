@@ -6,7 +6,7 @@ namespace Expressionator.Expressions
 {
 	public abstract class Node
 	{
-		public abstract void accept(INodeVisitor visitor);
+		public abstract void Accept(INodeVisitor visitor);
 
 		public override string ToString()
 		{

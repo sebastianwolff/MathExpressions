@@ -6,11 +6,11 @@ namespace Expressionator.Expressions
 {
 	public class ContainsNode : Node
 	{
-		private Node _test;
-		private RangeNode _range;
+		private readonly Node _test;
+		private readonly RangeNode _range;
 
 		#region property accessors
-		public Node test
+		public Node Test
 		{
 			get
 			{
@@ -18,7 +18,7 @@ namespace Expressionator.Expressions
 			}
 		}
 
-		public RangeNode range
+		public RangeNode Range
 		{
 			get
 			{
@@ -33,9 +33,9 @@ namespace Expressionator.Expressions
 			_range = range;
 		}
 
-		public override void accept(INodeVisitor visitor)
+		public override void Accept(INodeVisitor visitor)
 		{
-			visitor.visit(this);
+			visitor.Visit(this);
 		}
 	}
 }

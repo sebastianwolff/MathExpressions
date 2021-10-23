@@ -56,7 +56,7 @@ namespace Expressionator.Expressions.Builder
 		/// <returns>the compiled expression tree</returns>
 		public static Node ParseExpression(string pattern)
 		{
-			ExpressionBuilder builder = new ExpressionBuilder();
+			var builder = new ExpressionBuilder();
 
 			return builder.Parse(pattern);
 		}
@@ -64,12 +64,12 @@ namespace Expressionator.Expressions.Builder
 		#region IExpressionBuilder Members
 		public Node Parse(string expressionPattern)
 		{
-			initializeLexer(expressionPattern);
+			InitializeLexer(expressionPattern);
 
 			Node result = Expression(false);
 
-			if (currentToken.type != Token.Type.None)
-				throw new UnexpectedTokenException(currentToken.stringValue, currentToken.line, currentToken.column);
+			if (currentToken.TokenType != Token.Type.None)
+				throw new UnexpectedTokenException(currentToken.StringValue, currentToken.Line, currentToken.Column);
 
 			return result;
 		}
@@ -85,7 +85,7 @@ namespace Expressionator.Expressions.Builder
 		{
 			Node expr = LogicalExpr(get);
 
-			if (currentToken.type == Token.Type.Contains)
+			if (currentToken.TokenType == Token.Type.Contains)
 			{
 				Node low = RangeExpr(true);
 
@@ -114,12 +114,12 @@ namespace Expressionator.Expressions.Builder
 
 			while (true)
 			{
-				switch (currentToken.type)
+				switch (currentToken.TokenType)
 				{
 					case Token.Type.And:
 					case Token.Type.Or:
 					case Token.Type.XOr:
-						result = new CompareNode(TokenType2Compare(currentToken.type), result, RelExpr(true));
+						result = new CompareNode(TokenType2Compare(currentToken.TokenType), result, RelExpr(true));
 						break;
 					default:
 						return result;
@@ -133,7 +133,7 @@ namespace Expressionator.Expressions.Builder
 		{
 			Node result = RangeExpr(get);
 
-			switch (currentToken.type)
+			switch (currentToken.TokenType)
 			{
 				case Token.Type.Less:
 				case Token.Type.LessEqual:
@@ -141,7 +141,7 @@ namespace Expressionator.Expressions.Builder
 				case Token.Type.UnEqual:
 				case Token.Type.GreaterEqual:
 				case Token.Type.Greater:
-					result = new CompareNode(TokenType2Compare(currentToken.type), result, RangeExpr(true));
+					result = new CompareNode(TokenType2Compare(currentToken.TokenType), result, RangeExpr(true));
 					break;
 				default:
 					break;
@@ -153,25 +153,25 @@ namespace Expressionator.Expressions.Builder
 		{
 			Node result = AddExpr(get);
 
-			if (currentToken.type == Token.Type.DblPeriod)
+			if (currentToken.TokenType == Token.Type.DblPeriod)
 				result = new RangeNode(result, AddExpr(true));
 
 			return result;
 		}
 
-		private CompareNode.Compare TokenType2Compare(Token.Type type)
+		private static CompareNode.CompareTypes TokenType2Compare(Token.Type type)
 		{
 			switch (type)
 			{
-				case Token.Type.Less: return CompareNode.Compare.Less;
-				case Token.Type.LessEqual: return CompareNode.Compare.LessEqual;
-				case Token.Type.Equal: return CompareNode.Compare.Equal;
-				case Token.Type.UnEqual: return CompareNode.Compare.UnEqual;
-				case Token.Type.GreaterEqual: return CompareNode.Compare.GreaterEqual;
-				case Token.Type.Greater: return CompareNode.Compare.Greater;
-				case Token.Type.And: return CompareNode.Compare.And;
-				case Token.Type.Or: return CompareNode.Compare.Or;
-				case Token.Type.XOr: return CompareNode.Compare.XOr;
+				case Token.Type.Less: return CompareNode.CompareTypes.Less;
+				case Token.Type.LessEqual: return CompareNode.CompareTypes.LessEqual;
+				case Token.Type.Equal: return CompareNode.CompareTypes.Equal;
+				case Token.Type.UnEqual: return CompareNode.CompareTypes.UnEqual;
+				case Token.Type.GreaterEqual: return CompareNode.CompareTypes.GreaterEqual;
+				case Token.Type.Greater: return CompareNode.CompareTypes.Greater;
+				case Token.Type.And: return CompareNode.CompareTypes.And;
+				case Token.Type.Or: return CompareNode.CompareTypes.Or;
+				case Token.Type.XOr: return CompareNode.CompareTypes.XOr;
 				default:
 					throw new Exception("Internal error: Invalid token-to-compare conversion.");
 			}
@@ -183,7 +183,7 @@ namespace Expressionator.Expressions.Builder
 
 			while (true)
 			{
-				switch (currentToken.type)
+				switch (currentToken.TokenType)
 				{
 					case Token.Type.Plus:
 						result = new AddNode(result, MulExpr(true));
@@ -208,7 +208,7 @@ namespace Expressionator.Expressions.Builder
 
 			while (true)
 			{
-				switch (currentToken.type)
+				switch (currentToken.TokenType)
 				{
 					case Token.Type.Mul:
 						result = new MulNode(result, PowExpr(true));
@@ -226,7 +226,7 @@ namespace Expressionator.Expressions.Builder
 		{
 			Node result = QualExpr(get);
 
-			while (currentToken.type == Token.Type.Pow)
+			while (currentToken.TokenType == Token.Type.Pow)
 				result = new PowNode(result, QualExpr(true));
 
 			return result;
@@ -236,22 +236,22 @@ namespace Expressionator.Expressions.Builder
 		{
 			Node result = ValueExpr(get);
 
-			while (currentToken.type == Token.Type.Period)
+			while (currentToken.TokenType == Token.Type.Period)
 			{
-				nextToken();
+				NextToken();
 
-				if (currentToken.type == Token.Type.Symbol)
+				if (currentToken.TokenType == Token.Type.Symbol)
 				{
-					if (currentToken.stringValue == "tag")
-						result = new DateQualExpr(DateQualExpr.Qual.Day, result);
-					else if (currentToken.stringValue == "monat")
-						result = new DateQualExpr(DateQualExpr.Qual.Month, result);
-					else if (currentToken.stringValue == "jahr")
-						result = new DateQualExpr(DateQualExpr.Qual.Year, result);
+					if (currentToken.StringValue == "tag")
+						result = new DateQualExpr(DateQualExpr.Quals.Day, result);
+					else if (currentToken.StringValue == "monat")
+						result = new DateQualExpr(DateQualExpr.Quals.Month, result);
+					else if (currentToken.StringValue == "jahr")
+						result = new DateQualExpr(DateQualExpr.Quals.Year, result);
 					else
 						continue;
 
-					nextToken(); // consume qualification symbol
+					NextToken(); // consume qualification symbol
 				}
 				else
 					throw new UnexpectedTokenException("Diese Art von Qualifikation nicht unterstuetzt", line, column);
@@ -277,14 +277,14 @@ namespace Expressionator.Expressions.Builder
 		private Node ValueExpr(bool get)
 		{
 			if (get)
-				nextToken();
+				NextToken();
 
-			switch (currentToken.type)
+			switch (currentToken.TokenType)
 			{
 				case Token.Type.Number:
 				{
-					Node result = new NumberNode(currentToken.numberValue);
-					nextToken();
+					Node result = new NumberNode(currentToken.NumberValue);
+					NextToken();
 					return result;
 				}
 				case Token.Type.RndOpen:
@@ -300,17 +300,17 @@ namespace Expressionator.Expressions.Builder
 					return result;
 				}
 				case Token.Type.If:
-					return conditional(true);
+					return Conditional(true);
 				case Token.Type.Plus:
 					return ValueExpr(true);
 				case Token.Type.Neg:
 					return new NegNode(ValueExpr(true));
 				case Token.Type.Symbol:
 				{
-					string symbolName = currentToken.stringValue;
-					nextToken();
+					string symbolName = currentToken.StringValue;
+					NextToken();
 
-					if (currentToken.type == Token.Type.RndOpen)
+					if (currentToken.TokenType == Token.Type.RndOpen)
 					{
 						Node arg = Expression(true);
 						Consume(Token.Type.RndClose);
@@ -319,22 +319,22 @@ namespace Expressionator.Expressions.Builder
 						switch (symbol) {
 							case "tage":
 							case "days":
-								return new TimeSpanCastExpr(TimeSpanCastExpr.Unit.Day, arg);
+								return new TimeSpanCastExpr(TimeSpanCastExpr.Units.Day, arg);
 							case "monate":
 							case "months":
-									return new TimeSpanCastExpr(TimeSpanCastExpr.Unit.Month, arg);
+									return new TimeSpanCastExpr(TimeSpanCastExpr.Units.Month, arg);
 							case "jahre":
 							case "years":
-									return new TimeSpanCastExpr(TimeSpanCastExpr.Unit.Year, arg);
+									return new TimeSpanCastExpr(TimeSpanCastExpr.Units.Year, arg);
 							case "jahr":
 							case "year":
-								return new DateQualExpr(DateQualExpr.Qual.Year, arg);
+								return new DateQualExpr(DateQualExpr.Quals.Year, arg);
 							case "monat":
 							case "month":
-									return new DateQualExpr(DateQualExpr.Qual.Month, arg);
+									return new DateQualExpr(DateQualExpr.Quals.Month, arg);
 							case "tag":
 							case "day":
-									return new DateQualExpr(DateQualExpr.Qual.Day, arg);
+									return new DateQualExpr(DateQualExpr.Quals.Day, arg);
 							case "round":
 									var precisionString = symbolName.ToLower().Replace("round", "");
 
@@ -357,21 +357,21 @@ namespace Expressionator.Expressions.Builder
 				}
 				case Token.Type.Date:
 				{
-					Node result = new DateExpr(currentToken.dateValue);
-					nextToken();
+					Node result = new DateExpr(currentToken.DateValue);
+					NextToken();
 					return result;
 				}
 				case Token.Type.Text: {
-					Node result = new TextNode(currentToken.stringValue);
-					nextToken();
+					Node result = new TextNode(currentToken.StringValue);
+					NextToken();
 					return result;
 				}
 				default:
-					throw new UnexpectedTokenException(currentToken.stringValue, currentToken.line, currentToken.column);
+					throw new UnexpectedTokenException(currentToken.StringValue, currentToken.Line, currentToken.Column);
 			}
 		}
 
-		private Node conditional(bool get)
+		private Node Conditional(bool get)
 		{
 			if (get)
 				Consume(Token.Type.If);
@@ -382,7 +382,7 @@ namespace Expressionator.Expressions.Builder
 
 			Node thenExpr = Expression(false);
 
-			Node elseExpr = (currentToken.type == Token.Type.Else) 
+			Node elseExpr = (currentToken.TokenType == Token.Type.Else) 
 				? Expression(true) 
 				: null;
 
@@ -401,11 +401,11 @@ namespace Expressionator.Expressions.Builder
 
 		private void Consume(Token.Type tokenType, bool get)
 		{
-			if (currentToken.type != tokenType)
-				throw new UnexpectedTokenException(currentToken.stringValue, currentToken.line, currentToken.column);
+			if (currentToken.TokenType != tokenType)
+				throw new UnexpectedTokenException(currentToken.StringValue, currentToken.Line, currentToken.Column);
 
 			if (get)
-				nextToken();
+				NextToken();
 		}
 		#endregion
 
@@ -416,7 +416,7 @@ namespace Expressionator.Expressions.Builder
 		private int currentChar;
 		private Token currentToken;
 
-		private int peekedNextChar
+		private int PeekedNextChar
 		{
 			get
 			{
@@ -424,7 +424,7 @@ namespace Expressionator.Expressions.Builder
 			}
 		}
 
-		private void initializeLexer(string pattern)
+		private void InitializeLexer(string pattern)
 		{
 			input = new StringReader(pattern);
 
@@ -432,11 +432,11 @@ namespace Expressionator.Expressions.Builder
 			column = 0;
 			currentChar = 0;
 
-			nextChar();
-			nextToken();
+			NextChar();
+			NextToken();
 		}
 
-		private int nextChar()
+		private int NextChar()
 		{
 			if (currentChar == '\n')
 			{
@@ -450,90 +450,90 @@ namespace Expressionator.Expressions.Builder
 			return currentChar = input.Read();
 		}
 
-		private Token nextToken()
+		private Token NextToken()
 		{
-			skipWhiteSpaces();
+			SkipWhiteSpaces();
 
 			switch (currentChar)
 			{
 				case '+':
-					nextChar();
+					NextChar();
 					return currentToken = new Token(Token.Type.Plus, line, column);
 				case '-':
-					nextChar();
+					NextChar();
 					return currentToken = new Token(Token.Type.Neg, line, column);
 				case '*':
-					nextChar();
+					NextChar();
 					return currentToken = new Token(Token.Type.Mul, line, column);
 				case '/':
-					nextChar();
+					NextChar();
 					return currentToken = new Token(Token.Type.Div, line, column);
 				case '^':
-					nextChar();
+					NextChar();
 					return currentToken = new Token(Token.Type.Pow, line, column);
 				case '(':
-					nextChar();
+					NextChar();
 					return currentToken = new Token(Token.Type.RndOpen, line, column);
 				case ')':
-					nextChar();
+					NextChar();
 					return currentToken = new Token(Token.Type.RndClose, line, column);
 				case '{':
-					nextChar();
+					NextChar();
 					return currentToken = new Token(Token.Type.SetOpen, line, column);
 				case '[':
-					nextChar();
+					NextChar();
 					return currentToken = new Token(Token.Type.BrOpen, line, column);
 				case ']':
-					nextChar();
+					NextChar();
 					return currentToken = new Token(Token.Type.BrClose, line, column);
 				case '}':
-					nextChar();
+					NextChar();
 					return currentToken = new Token(Token.Type.SetClose, line, column);
 				case '!':
-					if (peekedNextChar == '=') {
-						nextChar();
-						nextChar();
+					if (PeekedNextChar == '=') {
+						NextChar();
+						NextChar();
 						return currentToken = new Token(Token.Type.UnEqual, line, column);
 					}
 					break;
 				case '<':
-					switch (nextChar())
+					switch (NextChar())
 					{
 						case '=':
-							nextChar();
+							NextChar();
 							return currentToken = new Token(Token.Type.LessEqual, line, column);
 						case '>':
-							nextChar();
+							NextChar();
 							return currentToken = new Token(Token.Type.UnEqual, line, column);
 						default:
 							return currentToken = new Token(Token.Type.Less, line, column);
 					}
 				case '>':
-					switch (nextChar())
+					switch (NextChar())
 					{
 						case '=':
-							nextChar();
+							NextChar();
 							return currentToken = new Token(Token.Type.GreaterEqual, line, column);
 						default:
 							return currentToken = new Token(Token.Type.Greater, line, column);
 					}
 				case '=':
-					nextChar();
+					NextChar();
 					if (currentChar == '=')
-						nextChar();
+						NextChar();
 					return currentToken = new Token(Token.Type.Equal, line, column);
 				case '.':
-					nextChar();
+					NextChar();
 
 					if (currentChar == '.')
 					{
-						nextChar();
+						NextChar();
 
 						return currentToken = new Token(Token.Type.DblPeriod, line, column);
 					}
 					return currentToken = new Token(Token.Type.Period, line, column);
 				case ':':
-					nextChar();
+					NextChar();
 					return currentToken = new Token(Token.Type.Colon, line, column);
 				case '\'':
 				case '"':
@@ -542,14 +542,14 @@ namespace Expressionator.Expressions.Builder
 					break;
 			}
 
-			if (isDigit(currentChar)) 
+			if (IsDigit(currentChar)) 
 				return currentToken = ParseNumberOrDate();
 
-			if (isAlpha_(currentChar))
+			if (IsAlpha_(currentChar))
 			{
 				int _line = line;
 				int _column = column;
-				string symbol = parseSymbol();
+				string symbol = ParseSymbol();
 
 				for (Dictionary<string, Token.Type>.Enumerator e = keywords.GetEnumerator(); e.MoveNext(); )
 				{
@@ -571,50 +571,51 @@ namespace Expressionator.Expressions.Builder
 			throw new UnexpectedTokenException(String.Format("{0}", (char)currentChar), line, column);
 		}
 
-		private static Dictionary<string, Token.Type> keywords = createKeywordMappings();
+		private static readonly Dictionary<string, Token.Type> keywords = CreateKeywordMappings();
 
-		private static Dictionary<string, Token.Type> createKeywordMappings()
+		private static Dictionary<string, Token.Type> CreateKeywordMappings()
 		{
-			Dictionary<string, Token.Type> keywords = new Dictionary<string, Token.Type>();
+            Dictionary<string, Token.Type> keywords = new()
+            {
+                ["WENN"] = Token.Type.If,
+                ["DANN"] = Token.Type.Then,
+                ["SONST"] = Token.Type.Else,
 
-			keywords["WENN"] = Token.Type.If;
-			keywords["DANN"] = Token.Type.Then;
-			keywords["SONST"] = Token.Type.Else;
+                ["INNERHALB"] = Token.Type.Contains,
 
-			keywords["INNERHALB"] = Token.Type.Contains;
-
-			keywords["UND"] = Token.Type.And;
-			keywords["ODER"] = Token.Type.Or;
-			keywords["XODER"] = Token.Type.XOr;
+                ["UND"] = Token.Type.And,
+                ["ODER"] = Token.Type.Or,
+                ["XODER"] = Token.Type.XOr,
 
 
-			keywords["IF"] = Token.Type.If;
-			keywords["THEN"] = Token.Type.Then;
-			keywords["ELSE"] = Token.Type.Else;
+                ["IF"] = Token.Type.If,
+                ["THEN"] = Token.Type.Then,
+                ["ELSE"] = Token.Type.Else,
 
-			keywords["BETWEEN"] = Token.Type.Contains;
+                ["BETWEEN"] = Token.Type.Contains,
 
-			keywords["AND"] = Token.Type.And;
-			keywords["OR"] = Token.Type.Or;
-			keywords["XOR"] = Token.Type.XOr;
+                ["AND"] = Token.Type.And,
+                ["OR"] = Token.Type.Or,
+                ["XOR"] = Token.Type.XOr
+            };
 
-			return keywords;
+            return keywords;
 		}
 
-		private bool isDigit(int ch)
+		private static bool IsDigit(int ch)
 		{
 			return ch >= '0' && ch <= '9';
 		}
 
-		private bool isAlpha(int ch)
+		private static bool IsAlpha(int ch)
 		{
 			return (ch >= 'a' && ch <= 'z')
 				|| (ch >= 'A' && ch <= 'Z');
 		}
 
-		private bool isAlpha_(int ch)
+		private static bool IsAlpha_(int ch)
 		{
-			return isAlpha(ch) || ch == '_';
+			return IsAlpha(ch) || ch == '_';
 		}
 
 		private Token ParseSimpleNumber()
@@ -622,9 +623,9 @@ namespace Expressionator.Expressions.Builder
 			int _line = line;
 			int _column = column;
 
-			StringBuilder sb = new StringBuilder(10);
+			var sb = new StringBuilder(10);
 
-			for (; isDigit(currentChar); nextChar())
+			for (; IsDigit(currentChar); NextChar())
 				sb.Append((char)currentChar);
 
 			if (sb.Length == 0)
@@ -647,19 +648,19 @@ namespace Expressionator.Expressions.Builder
 			int _line = line;
 			int _column = column;
 
-			StringBuilder sb = new StringBuilder(10);
+			var sb = new StringBuilder(10);
 
-			for (; isDigit(currentChar); nextChar())
+			for (; IsDigit(currentChar); NextChar())
 				sb.Append((char)currentChar);
 
 			// it MAY be a date
-			if (currentChar == '.' && sb.Length >= 1 && sb.Length <= 2 && peekedNextChar != '.')
+			if (currentChar == '.' && sb.Length >= 1 && sb.Length <= 2 && PeekedNextChar != '.')
 			{
 				int dayLength = sb.Length; // DD.
 
 				sb.Append('.');
 
-				for (nextChar(); isDigit(currentChar); nextChar()) // possibly MM (or the .floating point value)
+				for (NextChar(); IsDigit(currentChar); NextChar()) // possibly MM (or the .floating point value)
 					sb.Append((char)currentChar);
 
 				if (currentChar == '.' && sb.Length >= dayLength + 2 && sb.Length <= dayLength + 3)
@@ -668,7 +669,7 @@ namespace Expressionator.Expressions.Builder
 
 					sb.Append('.');
 
-					for (nextChar(); isDigit(currentChar); nextChar())
+					for (NextChar(); IsDigit(currentChar); NextChar())
 						sb.Append((char)currentChar);
 
 					if (sb.Length != dayMonthLength + 5)
@@ -680,21 +681,21 @@ namespace Expressionator.Expressions.Builder
 					int year = Int32.Parse(pattern.Substring(sb.Length - dayMonthLength + 1));
 
 					// check wether we got a fully qualified date-time or just a date-without-time ...
-					skipWhiteSpaces();
-					if (!isDigit(currentChar) || !isDigit(peekedNextChar))
+					SkipWhiteSpaces();
+					if (!IsDigit(currentChar) || !IsDigit(PeekedNextChar))
 						return new Token(new DateTime(year, month, day), _line, _column);
 
-					int hour = (int)ParseSimpleNumber().numberValue;
+					int hour = (int)ParseSimpleNumber().NumberValue;
 
-					nextToken();
+					NextToken();
 					Consume(Token.Type.Colon, false);
 
-					int minute = (int)ParseSimpleNumber().numberValue;
+					int minute = (int)ParseSimpleNumber().NumberValue;
 
-					nextToken();
+					NextToken();
 					Consume(Token.Type.Colon, false);
 
-					int second = (int)ParseSimpleNumber().numberValue;
+					int second = (int)ParseSimpleNumber().NumberValue;
 
 					// XXX: Aktuell werden die ZEIT-Werte eh vom DateExpr node weggeschnitten,
 					// jedoch ergibt sich offenbar die Not Zeit formate mit parsen zu muessen *und*
@@ -703,12 +704,12 @@ namespace Expressionator.Expressions.Builder
 					return new Token(new DateTime(year, month, day, hour, minute, second), _line, _column);
 				}
 			}
-			else if ((currentChar == '.' && peekedNextChar != '.') || currentChar == ',')
+			else if ((currentChar == '.' && PeekedNextChar != '.') || currentChar == ',')
 			{
 				sb.Append((char)currentChar);
-				nextChar();
+				NextChar();
 
-				for (; isDigit(currentChar); nextChar())
+				for (; IsDigit(currentChar); NextChar())
 					sb.Append((char)currentChar);
 			}
 
@@ -717,15 +718,15 @@ namespace Expressionator.Expressions.Builder
 
 		// SYMBOL ::= ALPHA_ [ALPHA_ | DIGIT]...
 		// ALPHA_ ::= 'a'..'z' | 'A'..'Z' | '_'
-		private string parseSymbol()
+		private string ParseSymbol()
 		{
-			StringBuilder sb = new StringBuilder(16);
+			var sb = new StringBuilder(16);
 
-			if (isAlpha_(currentChar))
+			if (IsAlpha_(currentChar))
 			{
 				sb.Append((char)currentChar);
 
-				for (nextChar(); isAlpha_(currentChar) || isDigit(currentChar); nextChar())
+				for (NextChar(); IsAlpha_(currentChar) || IsDigit(currentChar); NextChar())
 					sb.Append((char)currentChar);
 			}
 
@@ -737,25 +738,25 @@ namespace Expressionator.Expressions.Builder
 			int oldcolumn = column;
 
 			char delimiter = (char)currentChar;
-			StringBuilder sb = new StringBuilder();
+			var sb = new StringBuilder();
 			
-			while (nextChar() != delimiter)
+			while (NextChar() != delimiter)
 				sb.Append((char)currentChar);
 			
-			nextChar();
+			NextChar();
 
 			return new Token(Token.Type.Text, sb.ToString(), oldline, oldcolumn);
 		}
 
 		// S ::= \x20 | \t | \r | \n
-		private void skipWhiteSpaces()
+		private void SkipWhiteSpaces()
 		{
 			// TODO: skip comments as well
-			while (isWhiteSpace(currentChar))
-				nextChar();
+			while (IsWhiteSpace(currentChar))
+				NextChar();
 		}
 
-		private bool isWhiteSpace(int ch)
+		private static bool IsWhiteSpace(int ch)
 		{
 			switch (ch)
 			{
