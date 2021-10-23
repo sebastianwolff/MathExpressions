@@ -19,8 +19,6 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>0</ApplicationRevision>
-    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
@@ -31,6 +29,16 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageId>MathExpression.net</PackageId>
     <PackageTags>.net 5, Expression Parser, Math Expressions</PackageTags>
+	<VersionSuffix>1.0.1.$([System.DateTime]::UtcNow.ToString(mmff))</VersionSuffix>
+	<AssemblyVersion Condition=" '$(VersionSuffix)' == '' ">0.0.0.1</AssemblyVersion>
+	<AssemblyVersion Condition=" '$(VersionSuffix)' != '' ">$(VersionSuffix)</AssemblyVersion>
+	<Version Condition=" '$(VersionSuffix)' == '' ">0.0.1.0</Version>
+	<Version Condition=" '$(VersionSuffix)' != '' ">$(VersionSuffix)</Version>
+	<Product>MathExpression.net</Product>
+	<Title>MathExpression.net</Title>
+	<PackageReadmeFile>README.md</PackageReadmeFile>
+	
+	<Description>A simple .NET 5 Math Expression Parser / Interpreter. This library interprets mathematical expressions from text input.</Description>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <OutputPath>..\..\..\..\Debug\bin\</OutputPath>
@@ -39,6 +47,12 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <OutputPath>..\..\..\..\Release\bin\</OutputPath>
   </PropertyGroup>
+  <ItemGroup>
+	<None Include="README.md" Pack="true" PackagePath="\"/>
+    <Content Include="README.md">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
   <ItemGroup>
     <Service Include="{B4F97281-0DBD-4835-9ED8-7DFB966E87FF}" />
   </ItemGroup>
