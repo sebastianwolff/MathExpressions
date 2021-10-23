@@ -1,5 +1,5 @@
 # MathExpressions
-A simple Math Expression Parser / Interpreter
+A simple .NET 5 Math Expression Parser / Interpreter.
 
 This library interprets mathematical expressions from text input. 
 
@@ -134,3 +134,5 @@ ____________________________________
 ````
 
 
+## Remarks
+Special Shout-Out to Christian Parpart as initial Author!
