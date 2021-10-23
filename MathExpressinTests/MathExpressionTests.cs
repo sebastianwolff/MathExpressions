@@ -12,11 +12,20 @@ namespace MathExpressinTests
         [TestClass()]
         public class ExpressionEvaluatorTests
         {
+
+
             [TestMethod()]
             public void AdditionNumberTest()
             {
                 var result = ExpressionEvaluator.EvaluateExpression("1+1");
                 Assert.AreEqual(result.number, 2);
+            }
+
+            [TestMethod()]
+            public void DivisionByZeroTest()
+            {
+                var result = ExpressionEvaluator.EvaluateExpression("5/0");
+                Assert.AreEqual(result.number, double.PositiveInfinity);
             }
 
             [TestMethod()]

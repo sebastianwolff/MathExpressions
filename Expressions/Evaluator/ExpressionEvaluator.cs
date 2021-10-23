@@ -260,6 +260,49 @@ namespace Expressionator.Expressions.Evaluator
 			return EvaluateExpression(ExpressionBuilder.ParseExpression(expression), (EvaluateVariableDelegate)null);
 		}
 
+		public static T EvaluateExpression<T>(string expression, Dictionary<string, object> variables = null)
+        {
+			object result;
+			var evalResult = (variables != null) 
+				? EvaluateExpression(expression, variables)
+				: EvaluateExpression(expression);
+
+			if (typeof(T) == typeof(DateRange))
+			{
+				result = evalResult.dateRange;
+            }
+            else
+            {
+				switch (Type.GetTypeCode(typeof(T)))
+				{
+					case TypeCode.String:
+						result = evalResult.ToString();
+						break;
+					case TypeCode.Int32:
+					case TypeCode.Int16:
+						result = (T)(object)Convert.ToInt32(evalResult.number);
+						break;
+					case TypeCode.Double:
+						result = evalResult.number;
+						break;
+					case TypeCode.Decimal:
+						result = (decimal)evalResult.number;
+						break;
+					case TypeCode.Boolean:
+						result = evalResult.boolean;
+						break;
+					case TypeCode.DateTime:
+						result = evalResult.date;
+						break;
+					default:
+						throw new NotSupportedException($"{typeof(T)} is not not supported yet");
+						
+				}
+            }
+
+			return (T)result;
+		}
+
 		/// <summary>
 		/// a little abbreviation method for quickly evaluating a parametrized expression evaluation.
 		/// </summary>
@@ -288,8 +331,6 @@ namespace Expressionator.Expressions.Evaluator
 
 		private static Node CreateNode(object value) 
 		{
-			Type vt = value.GetType();
-
 			if (value is Node)
 				return (Node)value; // TODO: use ExpressionCloner.Clone(value);
 
