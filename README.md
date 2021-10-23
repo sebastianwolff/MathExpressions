@@ -41,6 +41,15 @@ ____________________________________
 // result.ToString() -> "Yes, it´s true!");
 ````
 
+### If Then Else (AND/OR)
+
+```` C#
+ var result = ExpressionEvaluator.EvaluateExpression($"IF (1 > 0 AND 'Yes' != 'No') OR 100/10=10 THEN 'Yes, it´s true!' ELSE 'No! Your wrong ..'");
+____________________________________
+// result.ToString() -> "Yes, it´s true!");
+````
+
+
 ### String Comparsion
 ````C#
 
@@ -85,6 +94,27 @@ var result = ExpressionEvaluator.EvaluateExpression($"Year({d1})");
 ____________________________________
 // result.ToString() -> "2021";
             
+````
+
+### Between Date
+````C#
+var d1 = "01.01.2020";
+var d2 = "31.12.2020";
+var d3 = "15.06.2020";
+var result = ExpressionEvaluator.EvaluateExpression($"{d3} BETWEEN {d1} AND {d2}");
+____________________________________
+// result.boolean -> True;
+````
+
+
+### Between Numbers
+````C#
+var d1 = 1;
+var d2 = 10;
+var d3 = 5;
+var result = ExpressionEvaluator.EvaluateExpression($"{d3} BETWEEN {d1} AND {d2}");
+____________________________________
+// result.boolean -> True;
 ````
 
 ### Using Variables 
