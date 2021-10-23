@@ -18,10 +18,10 @@ jobs:
       with:
         dotnet-version: 5.0.x
     - name: Restore dependencies
-      run: dotnet restore Expressions/Expressions.sln
+      run: dotnet restore Expressions.sln
       working-directory: Expressions
     - name: Build
-      run: dotnet build Expressions/Expressions.sln --no-restore
+      run: dotnet build Expressions.sln --no-restore
       working-directory: Expressions
     - name: Test
       run: dotnet test --no-build --verbosity normal
