@@ -26,7 +26,7 @@ jobs:
     - name: Publish MathExpression.net
       uses: brandedoutcast/publish-nuget@v2.5.5
       with:
-          PROJECT_FILE_PATH: Expressions.csproj
+          PROJECT_FILE_PATH: Expressions/Expressions.csproj
           NUGET_KEY: ${{secrets.NUGET_API_KEY}}
           PACKAGE_NAME: MathExpression.net
           
