@@ -1,4 +1,4 @@
-# MathExpressions
+# MathExpression.net
 A simple .NET 5 Math Expression Parser / Interpreter.
 
 This library interprets mathematical expressions from text input. 
@@ -10,6 +10,10 @@ Basic functions:
 - Date calculations (Range)
 - Extract Date parts (month, day, year)
 - Conditional statement  IF THEN ELSE
+
+## Installation
+
+[MathExpression.net on nuget.org](https://www.nuget.org/packages/MathExpression.net/)
 
 ## Examples
 
