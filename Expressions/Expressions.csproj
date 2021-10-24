@@ -4,20 +4,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>Expressionator</RootNamespace>
     <AssemblyName>Expressionator</AssemblyName>
-    <DelaySign>true</DelaySign>
-    <SccProjectName>SAK</SccProjectName>
-    <SccLocalPath>SAK</SccLocalPath>
-    <SccAuxPath>SAK</SccAuxPath>
-    <SccProvider>SAK</SccProvider>
     <PublishUrl>publish\</PublishUrl>
-    <Install>true</Install>
-    <InstallFrom>Disk</InstallFrom>
-    <UpdateEnabled>false</UpdateEnabled>
-    <UpdateMode>Foreground</UpdateMode>
-    <UpdateInterval>7</UpdateInterval>
-    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
-    <UpdatePeriodically>false</UpdatePeriodically>
-    <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
@@ -29,16 +16,15 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageId>MathExpression.net</PackageId>
     <PackageTags>.net 5, Expression Parser, Math Expressions</PackageTags>
-	<VersionSuffix>1.0.1.$([System.DateTime]::UtcNow.ToString(mmff))</VersionSuffix>
-	<AssemblyVersion Condition=" '$(VersionSuffix)' == '' ">0.0.0.1</AssemblyVersion>
-	<AssemblyVersion Condition=" '$(VersionSuffix)' != '' ">$(VersionSuffix)</AssemblyVersion>
-	<Version Condition=" '$(VersionSuffix)' == '' ">0.0.1.0</Version>
-	<Version Condition=" '$(VersionSuffix)' != '' ">$(VersionSuffix)</Version>
-	<Product>MathExpression.net</Product>
-	<Title>MathExpression.net</Title>
-	<PackageReadmeFile>README.md</PackageReadmeFile>
-	
-	<Description>A simple .NET 5 Math Expression Parser / Interpreter. This library interprets mathematical expressions from text input.</Description>
+    <Deterministic>False</Deterministic>
+    <Product>MathExpression.net</Product>
+    <Title>MathExpression.net</Title>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/sebastianwolff/MathExpressions</RepositoryUrl>
+    <Description>A simple .NET 5 Math Expression Parser / Interpreter. This library interprets mathematical expressions from text input.</Description>
+    <AssemblyVersion>1.0.1.503</AssemblyVersion>
+    <FileVersion>1.0.1.503</FileVersion>
+    <Version>1.0.1.503</Version>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <OutputPath>..\..\..\..\Debug\bin\</OutputPath>
@@ -53,13 +39,23 @@
   <ItemGroup>
     <None Include="..\LICENSE">
       <Pack>True</Pack>
-      <PackagePath></PackagePath>
+      <PackagePath>
+      </PackagePath>
     </None>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.md">
       <Pack>True</Pack>
-      <PackagePath></PackagePath>
+      <PackagePath>
+      </PackagePath>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <None Update="UpdateBuildVersion.ps1">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="powershell.exe –NonInteractive –ExecutionPolicy Unrestricted -command &quot;&amp;{.\UpdateBuildVersion.ps1}&quot;" WorkingDirectory="$(MSBuildProjectDirectory)" />
+  </Target>
 </Project>
