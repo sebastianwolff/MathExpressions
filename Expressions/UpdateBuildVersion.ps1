@@ -19,7 +19,7 @@ $oldVersion = $assemblyVersion[0];
 
 $avBuildNew  = ([int]$avBuild) 
 $avBuild2New = ([int]$avBuild2[0]) + 1;
-if($avBuild2New -ge 1000) {
+if($avBuild2New -ge 10000) {
     $avBuildNew  = $avBuildNew + 1 
     $avBuild2New = 100;
 }
