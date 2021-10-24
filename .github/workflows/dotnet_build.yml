@@ -9,7 +9,7 @@ on:
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
     - uses: actions/checkout@v2
@@ -23,4 +23,9 @@ jobs:
     - name: Build
       run: dotnet build Expressions.sln --configuration Release  --no-restore
       working-directory: Expressions
-
+    - name: Test
+      run:  dotnet test  Expressions.sln --configuration Release
+      working-directory: Expressions
+ #   - name: Put Nuget
+ #     run: dotnet nuget push AppLogger.1.0.0.nupkg --api-key ${{secrets.NUGET_API_KEY}} --source https://api.nuget.org/v3/index.json
+          
