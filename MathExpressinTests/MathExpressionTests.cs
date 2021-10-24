@@ -87,8 +87,8 @@ namespace MathExpressinTests
             [TestMethod()]
             public void SubstractDateTest()
             {
-                var d1 = new DateTime(2020, 01, 01);
-                var d2 = new DateTime(2019, 01, 01);
+                var d1 = new DateTime(2020, 01, 01).ToString("dd.MM.yyyy");
+                var d2 = new DateTime(2019, 01, 01).ToString("dd.MM.yyyy");
                 var result = ExpressionEvaluator.EvaluateExpression($"{d1} - {d2}");
 
                 Assert.AreEqual(result.DateRange.TotalDays, 365);
@@ -97,8 +97,8 @@ namespace MathExpressinTests
             [TestMethod()]
             public void SubstractDateDayTest()
             {
-                var d1 = new DateTime(2020, 01, 01);
-                var d2 = new DateTime(2019, 01, 01);
+                var d1 = new DateTime(2020, 01, 01).ToString("dd.MM.yyyy");
+                var d2 = new DateTime(2019, 01, 01).ToString("dd.MM.yyyy");
                 var result = ExpressionEvaluator.EvaluateExpression($"days({d1} - {d2})");
 
                 Assert.AreEqual(result.Number, 365);
@@ -153,9 +153,11 @@ namespace MathExpressinTests
             [TestMethod()]
             public void CombinedSubstractDateTest()
             {
-                var d1 = new DateTime(2021, 01, 01);
-                var d2 = new DateTime(2020, 01, 01);
-                var result = ExpressionEvaluator.EvaluateExpression($"Years({d1} - {d2}) >= 1");
+                var d1 = new DateTime(2021, 01, 01).ToString("dd.MM.yyyy");
+                var d2 = new DateTime(2020, 01, 01).ToString("dd.MM.yyyy");
+                var ex = $"Years({d1} - {d2}) >= 1";
+                Console.WriteLine(ex);
+                var result = ExpressionEvaluator.EvaluateExpression(ex);
 
                 Assert.IsTrue(result.Boolean);
             }
@@ -214,9 +216,9 @@ namespace MathExpressinTests
             [TestMethod()]
             public void ComplexTest()
             {
-                var d1 = new DateTime(2021, 01, 01);
-                var d2 = new DateTime(2020, 01, 01);
-                var d3 = new DateTime(2020, 06, 01);
+                var d1 = new DateTime(2021, 01, 01).ToString("dd.MM.yyyy");
+                var d2 = new DateTime(2020, 01, 01).ToString("dd.MM.yyyy");
+                var d3 = new DateTime(2020, 06, 01).ToString("dd.MM.yyyy");
 
                 var expression = @"IF " +
                     @" 1 > 0 " +

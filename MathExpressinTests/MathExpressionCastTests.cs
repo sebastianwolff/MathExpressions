@@ -27,7 +27,6 @@ namespace MathExpressinTests
             public void DoubleTest()
             {
                 var resultDouble = ExpressionEvaluator.EvaluateExpression<double>("1,5 + 1,487");
-                Assert.AreEqual(resultDouble, 2.987);
                 Assert.AreEqual(resultDouble.GetType(), typeof(double));
 
             }
