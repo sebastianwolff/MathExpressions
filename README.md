@@ -3,7 +3,11 @@ A simple .NET 5 Math Expression Parser / Interpreter.
 
 This library interprets mathematical expressions from text input. 
 
-Basic functions:
+## Important Note on Localization
+> Currently the Lib expects German localized input Strings (e.g. for Numbers:  Use 2,5 instead 2.5 and Dates in Format dd.mm.yyy )
+> Will be corrected/extended in one of the next versions
+
+### Basic functions
 
 - Math Operations [+] [-] [\\] [*] [^]
 - String, Date, Number Comparsion [<] [<=] [>] [>=] [=] 
