@@ -107,7 +107,7 @@ namespace MathExpressinTests
             [TestMethod()]
             public void DateYearTest()
             {
-                var d1 = new DateTime(2021, 01, 01);
+                var d1 = new DateTime(2021, 01, 01).ToString("dd.MM.yyyy");
                 var result = ExpressionEvaluator.EvaluateExpression($"Year({d1})");
 
                 Assert.AreEqual(result.ToString(), "2021");
