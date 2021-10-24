@@ -184,9 +184,10 @@ namespace MathExpressinTests
             [TestMethod()]
             public void MoreMathTest()
             {
-                var result = ExpressionEvaluator.EvaluateExpression($" ((1 + 1) * 10 / (7 / 3.5)) ^ 2 / 10000");
+                var result = ExpressionEvaluator.EvaluateExpression($"((1 + 1) * 10 / (7 / 3,5)) ^ 2 / 10000");
+                var result2 = Math.Pow(((1 + 1) * 10 / (7 / 3.5)), 2) / 10000;
 
-                Assert.AreEqual(result.Number, 1);
+                Assert.AreEqual(result2, result.Number );
             }
 
 
