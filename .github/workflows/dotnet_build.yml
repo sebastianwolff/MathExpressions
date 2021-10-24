@@ -9,7 +9,7 @@ on:
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
     - uses: actions/checkout@v2
@@ -23,10 +23,8 @@ jobs:
     - name: Build
       run: dotnet build Expressions.sln --configuration Release  --no-restore
       working-directory: Expressions
-    - name: Publish MathExpression.net
-      uses: brandedoutcast/publish-nuget@v2.5.5
-      with:
-          PROJECT_FILE_PATH: Expressions/Expressions.csproj
-          NUGET_KEY: ${{secrets.NUGET_API_KEY}}
-          PACKAGE_NAME: MathExpression.net
+    - name: Test
+      run:  dotnet test --configuration Release
+ #   - name: Put Nuget
+ #     run: dotnet nuget push AppLogger.1.0.0.nupkg --api-key ${{secrets.NUGET_API_KEY}} --source https://api.nuget.org/v3/index.json
           
