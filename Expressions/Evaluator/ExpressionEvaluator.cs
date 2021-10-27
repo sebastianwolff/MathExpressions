@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 using Expressionator.Utils;
 using Expressionator.Expressions.Builder;
+using System.Globalization;
 
 namespace Expressionator.Expressions.Evaluator
 {
@@ -25,6 +26,7 @@ namespace Expressionator.Expressions.Evaluator
 				Boolean,
 				Number,
 				Date,
+				Time,
 				TimeSpan,
 				Text,
                 TextRange,
@@ -40,6 +42,8 @@ namespace Expressionator.Expressions.Evaluator
 			private readonly double _number;
 			private readonly bool _boolean;
 			private readonly DateTime _date;
+			private readonly DateTime _time;
+
 			private readonly TimeSpan _timeSpan;
 			private readonly DateRange _dateRange;
 			private readonly string _text;
@@ -77,6 +81,15 @@ namespace Expressionator.Expressions.Evaluator
 				{
 					AssumeType(ResultTypes.Date);
 					return _date.Date;
+				}
+			}
+
+			public DateTime Time
+			{
+				get
+				{
+					AssumeType(ResultTypes.Time);
+					return _time;
 				}
 			}
 
@@ -137,11 +150,22 @@ namespace Expressionator.Expressions.Evaluator
 				_number = number;
 			}
 
-			public Result(DateTime date)
+			public Result(DateTime date, bool isTime = false)
 			{
-				_type = ResultTypes.Date;
-				_date = date;
+				_type =isTime ? ResultTypes.Time: ResultTypes.Date;
+                if (isTime)
+                {
+					_time = date;
+					_date = date;
+                }
+                else
+                {
+					_date = date;
+				}
+				
 			}
+
+			
 
 			public Result(TimeSpan timeSpan)
 			{
@@ -206,7 +230,9 @@ namespace Expressionator.Expressions.Evaluator
                         return Boolean.ToString();
                     case ResultTypes.Date:
                         return Date.ToString();
-                    case ResultTypes.DateRange:
+					case ResultTypes.Time:
+						return Date.ToLongTimeString();
+					case ResultTypes.DateRange:
                         return String.Format("DATERANGE({0})", DateRange);
                     case ResultTypes.Number:
                         return Number.ToString();
@@ -257,23 +283,33 @@ namespace Expressionator.Expressions.Evaluator
 		/// </summary>
 		/// <param name="expression">the mathematical expression to evaluate</param>
 		/// <returns>the evaluated result value</returns>
-		public static Result EvaluateExpression(string expression)
+		public static Result EvaluateExpression(string expression, CultureInfo culture = null)
 		{
-			return EvaluateExpression(ExpressionBuilder.ParseExpression(expression), (EvaluateVariableDelegate)null);
+			return EvaluateExpression(ExpressionBuilder.ParseExpression(expression, culture ), (EvaluateVariableDelegate)null, culture);
 		}
 
-		public static T EvaluateExpression<T>(string expression, Dictionary<string, object> variables = null)
+		public static T EvaluateExpression<T>(string expression, CultureInfo culture = null)
+		{
+			return (T)EvaluateExpression<T>(expression, null, culture);
+		}
+
+
+		public static T EvaluateExpression<T>(string expression, Dictionary<string, object> variables , CultureInfo culture = null)
         {
 			object result;
 			var evalResult = (variables != null) 
-				? EvaluateExpression(expression, variables)
-				: EvaluateExpression(expression);
-
+				? EvaluateExpression(expression, variables, culture)
+				: EvaluateExpression(expression, culture);
+			
 			if (typeof(T) == typeof(DateRange))
 			{
 				result = evalResult.DateRange;
             }
-            else
+			else if(typeof(T) == typeof(TimeSpan))
+            {
+				result = evalResult.TimeSpan;
+            }
+			else
             {
                 switch (Type.GetTypeCode(typeof(T)))
                 {
@@ -296,12 +332,20 @@ namespace Expressionator.Expressions.Evaluator
                         result = (decimal)evalResult.Number;
                         break;
                     case TypeCode.Boolean:
+
                         result = evalResult.Boolean;
                         break;
                     case TypeCode.DateTime:
-                        result = evalResult.Date;
-                        break;
-                    case TypeCode.Empty:
+						if (evalResult.Type == Result.ResultTypes.Time)
+						{
+							result = evalResult.Time;
+                        }
+                        else 
+						{ 
+							result = evalResult.Date;
+						}
+						break;
+					case TypeCode.Empty:
                     case TypeCode.Object:
                     case TypeCode.DBNull:
                     case TypeCode.Char:
@@ -322,27 +366,27 @@ namespace Expressionator.Expressions.Evaluator
         /// <param name="expression">the mathematical expression to evaluate</param>
         /// <param name="variableMap">contains a set of variables (name-value pairs) that are being referenced when they occur within the given expression</param>
         /// <returns>the respective evaluated result value</returns>
-        public static Result EvaluateExpression(string expression, Dictionary<string, string> variableMap)
+        public static Result EvaluateExpression(string expression, Dictionary<string, string> variableMap, CultureInfo culture = null)
 		{
 			var vars = new Dictionary<string, Node>();
 
 			foreach (KeyValuePair<string, string> pair in variableMap)
-				vars[pair.Key] = ExpressionBuilder.ParseExpression(pair.Value);
+				vars[pair.Key] = ExpressionBuilder.ParseExpression(pair.Value, culture);
 
-			return EvaluateExpression(expression, vars);
+			return EvaluateExpression(expression, vars, culture);
 		}
 
-		public static Result EvaluateExpression(string expression, IDictionary<string, object> variables)
+		public static Result EvaluateExpression(string expression, IDictionary<string, object> variables, CultureInfo culture = null)
 		{
 			var vars = new Dictionary<string, Node>();
 
 			foreach (KeyValuePair<string, object> variable in variables)
-				vars[variable.Key] = CreateNode(variable.Value);
+				vars[variable.Key] = CreateNode(variable.Value, culture);
 
-			return EvaluateExpression(expression, vars);
+			return EvaluateExpression(expression, vars, culture);
 		}
 
-		private static Node CreateNode(object value) 
+		private static Node CreateNode(object value, CultureInfo culture = null) 
 		{
 			if (value is Node node)
 				return node; // TODO: use ExpressionCloner.Clone(value);
@@ -353,7 +397,18 @@ namespace Expressionator.Expressions.Evaluator
 			if (value is string stringVal)
 				return new TextNode(stringVal);
 
-			return ExpressionBuilder.ParseExpression(value.ToString());
+		
+			//Special Types Culture Parsing
+			var tryParse = value.ToString();
+
+			if (value is decimal decimalVal)
+				tryParse = decimalVal.ToString(culture);
+
+			if (value is double doubleVal)
+				tryParse = doubleVal.ToString(culture);
+
+
+			return ExpressionBuilder.ParseExpression(tryParse, culture);
 		}
 
 		/// <summary>
@@ -363,9 +418,9 @@ namespace Expressionator.Expressions.Evaluator
 		/// <param name="expression">the mathematical expression to evaluate</param>
 		/// <param name="variableMap">contains a set of variables (name-value pairs) that are being referenced when they occur within the given expression</param>
 		/// <returns>the respective evaluated result value</returns>
-		public static Result EvaluateExpression(string expression, Dictionary<string, Node> variableMap)
+		public static Result EvaluateExpression(string expression, Dictionary<string, Node> variableMap, CultureInfo culture = null)
 		{
-			return EvaluateExpression(ExpressionBuilder.ParseExpression(expression), variableMap);
+			return EvaluateExpression(ExpressionBuilder.ParseExpression(expression), variableMap, culture);
 		}
 
 		/// <summary>
@@ -375,9 +430,9 @@ namespace Expressionator.Expressions.Evaluator
 		/// <param name="expression">the mathematical expression to evaluate</param>
 		/// <param name="evalVar">the delegate to invoke when a variable needs to be resolved into its value</param>
 		/// <returns></returns>
-		public static Result EvaluateExpression(string expression, EvaluateVariableDelegate evalVar)
+		public static Result EvaluateExpression(string expression, EvaluateVariableDelegate evalVar, CultureInfo culture = null)
 		{
-			return EvaluateExpression(ExpressionBuilder.ParseExpression(expression), evalVar);
+			return EvaluateExpression(ExpressionBuilder.ParseExpression(expression), evalVar, culture);
 		}
 
 		// -------------------------------------------------------------------------------------------
@@ -387,9 +442,9 @@ namespace Expressionator.Expressions.Evaluator
 		/// </summary>
 		/// <param name="expression">the mathematical expression to evaluate</param>
 		/// <returns>the evaluated result value</returns>
-		public static Result EvaluateExpression(Node expression)
+		public static Result EvaluateExpression(Node expression, CultureInfo culture = null)
 		{
-			return EvaluateExpression(expression, (EvaluateVariableDelegate)null);
+			return EvaluateExpression(expression, (EvaluateVariableDelegate)null, culture);
 		}
 
 		/// <summary>
@@ -399,7 +454,7 @@ namespace Expressionator.Expressions.Evaluator
 		/// <param name="expression">the mathematical expression to evaluate</param>
 		/// <param name="variableMap">contains a set of variables (name-value pairs) that are being referenced when they occur within the given expression</param>
 		/// <returns>the respective evaluated result value</returns>
-		public static Result EvaluateExpression(Node expression, Dictionary<string, Result> variableMap)
+		public static Result EvaluateExpression(Node expression, Dictionary<string, Result> variableMap, CultureInfo culture = null)
 		{
 			var variableNodeMap = new Dictionary<string, Node>(variableMap.Count);
 
@@ -439,7 +494,7 @@ namespace Expressionator.Expressions.Evaluator
                 }
             }
 
-            return EvaluateExpression(expression, variableNodeMap, 1);
+            return EvaluateExpression(expression, variableNodeMap, 1, culture);
         }
 
         /// <summary>
@@ -449,9 +504,9 @@ namespace Expressionator.Expressions.Evaluator
         /// <param name="expression">the mathematical expression to evaluate</param>
         /// <param name="variableMap">contains a set of variables (name-value pairs) that are being referenced when they occur within the given expression</param>
         /// <returns>the respective evaluated result value</returns>
-        public static Result EvaluateExpression(Node expression, Dictionary<string, Node> variableMap)
+        public static Result EvaluateExpression(Node expression, Dictionary<string, Node> variableMap, CultureInfo culture = null)
 		{
-			return EvaluateExpression(expression, variableMap, 64);
+			return EvaluateExpression(expression, variableMap, 64, culture);
 		}
 
 		/// <summary>
@@ -462,13 +517,14 @@ namespace Expressionator.Expressions.Evaluator
 		/// <param name="variableMap">contains a set of variables (name-value pairs) that are being referenced when they occur within the given expression</param>
 		/// <param name="recursionLimit">sets the variable evaluation recursion limit. In case of exceeding it, an exception gets thrown</param>
 		/// <returns>the respective evaluated result value</returns>
-		public static Result EvaluateExpression(Node expression, Dictionary<string, Node> variableMap, int recursionLimit)
+		public static Result EvaluateExpression(Node expression, Dictionary<string, Node> variableMap, int recursionLimit, CultureInfo culture = null)
 		{
             var evaluator = new ExpressionEvaluator
             {
                 recursionDepth = 0,
                 recursionLimit = recursionLimit,
 				variableMap = variableMap
+				
             };
 
             evaluator.evaluateVariable = new EvaluateVariableDelegate(evaluator.EvaluateVariableFromMap);
@@ -485,7 +541,7 @@ namespace Expressionator.Expressions.Evaluator
 		/// <param name="expression">the mathematical expression to evaluate</param>
 		/// <param name="evalVar">the delegate to invoke when a variable needs to be resolved into its value</param>
 		/// <returns></returns>
-		public static Result EvaluateExpression(Node expression, EvaluateVariableDelegate evalVar)
+		public static Result EvaluateExpression(Node expression, EvaluateVariableDelegate evalVar, CultureInfo culture = null)
 		{
             var evaluator = new ExpressionEvaluator
             {
@@ -563,20 +619,60 @@ namespace Expressionator.Expressions.Evaluator
 			switch (left.Type)
 			{
 				case Result.ResultTypes.Date:
-					// XXX: SPECIAL CASE: the difference of two dates is a timespan!
+					// SPECIAL CASE: the difference of two dates is a timespan!
 					if (node.Right.GetType() == typeof(NegNode))
 					{
 						Result dateRight = Evaluate(((NegNode)node.Right).SubExpression);
 
-						if (dateRight.Type == Result.ResultTypes.Date)
-						{
-							result = left.Date < dateRight.Date
-								? new Result(new DateRange(left.Date, dateRight.Date))
-								: new Result(new DateRange(dateRight.Date, left.Date));
+						if (dateRight.Type == Result.ResultTypes.Date || dateRight.Type == Result.ResultTypes.Time)
+                        {
+							var leftDate = (left.Type == Result.ResultTypes.Time) ? left.Time : left.Date;
+                            var rightDate = (dateRight.Type == Result.ResultTypes.Time) ? dateRight.Time : dateRight.Date;
 
+                            ConvertTimeToGivenDate(left, dateRight, ref leftDate, ref rightDate);
+
+                            result = leftDate < rightDate
+                                ? new Result(new DateRange(leftDate, rightDate))
+                                : new Result(new DateRange(rightDate, leftDate));
+
+                            break;
+                        }
+                    }
+
+					if (right.Type != Result.ResultTypes.TimeSpan)
+						throw new Exception("Operator evaluation error: Invalid operand type combination.");
+
+					result = new Result(left.Date.Add(right.TimeSpan));
+
+					break;
+
+				case Result.ResultTypes.Time:
+					// SPECIAL CASE: the difference of two dates is a timespan!
+					if (node.Right.GetType() == typeof(NegNode))
+					{
+						Result dateRight = Evaluate(((NegNode)node.Right).SubExpression);
+
+						if (dateRight.Type == Result.ResultTypes.Time)
+						{
+							result = new Result(new DateRange(dateRight.Time, left.Time));
 							break;
 						}
-					}
+					} 
+					else
+						// SPECIAL CASE: the sum of two Time Values is a timespan!
+						if (node.Right.GetType() == typeof(TimeExpr))
+						{
+							Result dateRight = Evaluate(node.Right);
+							if (dateRight.Type == Result.ResultTypes.Time)
+							{
+								var newRightDate = DateTime.MinValue.AddHours(dateRight.Time.Hour).AddMinutes(dateRight.Time.Minute).AddSeconds(dateRight.Time.Second);
+								newRightDate = newRightDate.AddHours(left.Time.Hour).AddMinutes(left.Time.Minute).AddSeconds(left.Time.Second);
+								result = new Result(new DateRange( DateTime.MinValue, newRightDate));
+
+								break;
+							}
+						}
+
 
 					if (right.Type != Result.ResultTypes.TimeSpan)
 						throw new Exception("Operator evaluation error: Invalid operand type combination.");
@@ -616,6 +712,23 @@ namespace Expressionator.Expressions.Evaluator
             }
         }
 
+		/// <summary>
+		/// Special in the case of substracting TimeNode Values from DateNode Values
+		/// Set the Date to the TimeNode to the DateNode Date
+		/// </summary>
+		/// <param name="left"></param>
+		/// <param name="dateRight"></param>
+		/// <param name="leftDate"></param>
+		/// <param name="rightDate"></param>
+        private static void ConvertTimeToGivenDate(Result left, Result dateRight, ref DateTime leftDate, ref DateTime rightDate)
+        {
+            leftDate = (left.Type == Result.ResultTypes.Time && dateRight.Type == Result.ResultTypes.Date)
+                                            ? DateTime.Parse($"{rightDate.ToShortDateString()} {leftDate.ToLongTimeString()}") : leftDate;
+
+            rightDate = (dateRight.Type == Result.ResultTypes.Time && left.Type == Result.ResultTypes.Date)
+                ? DateTime.Parse($"{leftDate.ToShortDateString()} {rightDate.ToLongTimeString()}") : rightDate;
+        }
+
         public void Visit(NegNode node)
 		{
 			// SEMANTICS:
@@ -635,7 +748,11 @@ namespace Expressionator.Expressions.Evaluator
                 case Result.ResultTypes.Date:
                     result = new Result(new TimeSpan(-operand.Date.Ticks));
                     break;
-                case Result.ResultTypes.Boolean:
+
+				case Result.ResultTypes.Time:
+					result = new Result(new TimeSpan(-operand.Time.Ticks));
+					break;
+				case Result.ResultTypes.Boolean:
                 case Result.ResultTypes.Text:
                 case Result.ResultTypes.TextRange:
                 case Result.ResultTypes.DateRange:
@@ -1052,6 +1169,11 @@ namespace Expressionator.Expressions.Evaluator
 			result = new Result(date.Date);
 		}
 
+		public void Visit(TimeExpr date)
+		{
+			result = new Result(date.Time, true);
+		}
+
 		// TODO: rename DateCastExpr to TimeSpanCast maybe?
 		public void Visit(DateCastExpr dateCast)
 		{
@@ -1072,6 +1194,16 @@ namespace Expressionator.Expressions.Evaluator
 				case DateCastExpr.Units.Day:
 					result = new Result(new TimeSpan((long)(number.Number * TimeSpan.FromDays(1).Ticks)));
 					break;
+				case DateCastExpr.Units.Hour:
+					result = new Result(new TimeSpan((long)(number.Number * TimeSpan.FromHours(1).Ticks)));
+					break;
+				case DateCastExpr.Units.Minute :
+					result = new Result(new TimeSpan((long)(number.Number * TimeSpan.FromMinutes(1).Ticks)));
+					break;
+				case DateCastExpr.Units.Second:
+					result = new Result(new TimeSpan((long)(number.Number * TimeSpan.FromSeconds(1).Ticks)));
+					break;
+
 				default:
 					throw new Exception("Internal conversion error: unhandled type.");
 			}
@@ -1097,6 +1229,15 @@ namespace Expressionator.Expressions.Evaluator
 				case DateQualExpr.Quals.Year:
 					result = new Result((double)dateResult.Date.Year);
 					break;
+				case DateQualExpr.Quals.Hour:
+					result = new Result((double)dateResult.Date.Hour);
+					break;
+				case DateQualExpr.Quals.Minute:
+					result = new Result((double)dateResult.Date.Minute);
+					break;
+				case DateQualExpr.Quals.Second:
+					result = new Result((double)dateResult.Date.Second);
+					break;
 				default:
 					throw new ExpressionEvaluationException("Invalid date qualification.");
 			}
@@ -1117,6 +1258,15 @@ namespace Expressionator.Expressions.Evaluator
 				case Result.ResultTypes.Number:
 					switch (timeSpan.Unit)
 					{
+						case TimeSpanCastExpr.Units.Second:
+							result = new Result(TimeSpan.FromSeconds(result.Number));
+							break;
+						case TimeSpanCastExpr.Units.Minute:
+							result = new Result(TimeSpan.FromMinutes(result.Number));
+							break;
+						case TimeSpanCastExpr.Units.Hour:
+							result = new Result(TimeSpan.FromHours(result.Number));
+							break;
 						case TimeSpanCastExpr.Units.Day:
 							result = new Result(TimeSpan.FromDays(result.Number));
 							break;
@@ -1141,11 +1291,18 @@ namespace Expressionator.Expressions.Evaluator
 						case TimeSpanCastExpr.Units.Month:
 							result = new Result(result.TimeSpan.TotalDays / 30);
 							break;
-//							throw new ExpressionEvaluationException("The result would be inaccurate.");
 						case TimeSpanCastExpr.Units.Year:
 							result = new Result(result.TimeSpan.TotalDays / 365);
 							break;
-//							throw new ExpressionEvaluationException("The result would be inaccurate.");
+						case TimeSpanCastExpr.Units.Hour:
+							result = new Result(result.TimeSpan.TotalHours);
+							break;
+						case TimeSpanCastExpr.Units.Minute:
+							result = new Result(result.TimeSpan.TotalMinutes);
+							break;
+						case TimeSpanCastExpr.Units.Second:
+							result = new Result(result.TimeSpan.TotalSeconds);
+							break;
 						default:
 							throw new Exception("Internal error: Unhandled enum value.");
 					}
@@ -1161,6 +1318,15 @@ namespace Expressionator.Expressions.Evaluator
 							break;
 						case TimeSpanCastExpr.Units.Year:
 							result = new Result(result.DateRange.TotalYears);
+							break;
+						case TimeSpanCastExpr.Units.Hour:
+							result = new Result(result.DateRange.TimeSpan.TotalHours);
+							break;
+						case TimeSpanCastExpr.Units.Minute:
+							result = new Result(result.DateRange.TimeSpan.TotalMinutes);
+							break;
+						case TimeSpanCastExpr.Units.Second:
+							result = new Result(result.DateRange.TimeSpan.TotalSeconds);
 							break;
 						default:
 							throw new Exception("Internal error: Unhandled enum value.");

@@ -10,7 +10,10 @@ namespace Expressionator.Expressions
 		{
 			Year,
 			Month,
-			Day
+			Day,
+			Hour, 
+			Minute,
+			Second
 		}
 
 		private readonly Quals _qual;

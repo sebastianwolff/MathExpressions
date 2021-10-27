@@ -21,12 +21,12 @@ namespace Expressionator.Utils
 		#region Properties
 		public DateTime Begin
 		{
-			get { return _begin.Date; }
+			get { return _begin; }
 		}
 
 		public DateTime End
 		{
-			get { return _end.Date; }
+			get { return _end; }
 		}
 
 		public TimeSpan TimeSpan

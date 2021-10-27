@@ -14,6 +14,7 @@ namespace Expressionator.Expressions
 		void Visit(RangeNode node);
 		void Visit(ContainsNode node);
 		void Visit(DateExpr node);
+		void Visit(TimeExpr node);
 		void Visit(DateCastExpr node);
 		void Visit(DateQualExpr node);
 		void Visit(TimeSpanCastExpr node);

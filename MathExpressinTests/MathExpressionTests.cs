@@ -50,34 +50,34 @@ namespace MathExpressinTests
             [ExpectedException(typeof(UnknownPrecisionException))]
             public void UnknownRoundPrecisionTest()
             {
-                var d1 = 0.2;
-                ExpressionEvaluator.EvaluateExpression($"roundFALSE1({d1})");
+                var d1 = "0,2";
+                ExpressionEvaluator.EvaluateExpression($"roundFALSE1({d1})", new System.Globalization.CultureInfo("de-DE"));
             }
 
             [TestMethod()]
             public void RoundTest()
             {
-                var d1 = 0.2;
-                var d2 = 0.5126;
-                var d3 = 0.5;
+                var d1 = "0,2";
+                var d2 = "0,5126";
+                var d3 = "0,5";
 
-                var result = ExpressionEvaluator.EvaluateExpression($"round({d1})");
+                var result = ExpressionEvaluator.EvaluateExpression($"round({d1})", new System.Globalization.CultureInfo("de-DE"));
                 Assert.AreEqual(result.Number, 0);
 
-                result = ExpressionEvaluator.EvaluateExpression($"round({d2})");
+                result = ExpressionEvaluator.EvaluateExpression($"round({d2})", new System.Globalization.CultureInfo("de-DE"));
                 Assert.AreEqual(result.Number, 1);
 
-                result = ExpressionEvaluator.EvaluateExpression($"round({d3})");
+                result = ExpressionEvaluator.EvaluateExpression($"round({d3})", new System.Globalization.CultureInfo("de-DE"));
                 Assert.AreEqual(result.Number, 0);
 
-                result = ExpressionEvaluator.EvaluateExpression($"round1({d2})");
+                result = ExpressionEvaluator.EvaluateExpression($"round1({d2})", new System.Globalization.CultureInfo("de-DE"));
                 Assert.AreEqual(result.Number, 0.5);
 
-                result = ExpressionEvaluator.EvaluateExpression($"round2({d2})");
+                result = ExpressionEvaluator.EvaluateExpression($"round2({d2})", new System.Globalization.CultureInfo("de-DE"));
                 Assert.AreEqual(result.Number, 0.51);
 
 
-                result = ExpressionEvaluator.EvaluateExpression($"round3({d2})");
+                result = ExpressionEvaluator.EvaluateExpression($"round3({d2})", new System.Globalization.CultureInfo("de-DE"));
                 Assert.AreEqual(result.Number, 0.513);
 
 
@@ -89,7 +89,7 @@ namespace MathExpressinTests
             {
                 var d1 = new DateTime(2020, 01, 01).ToString("dd.MM.yyyy");
                 var d2 = new DateTime(2019, 01, 01).ToString("dd.MM.yyyy");
-                var result = ExpressionEvaluator.EvaluateExpression($"{d1} - {d2}");
+                var result = ExpressionEvaluator.EvaluateExpression($"{d1} - {d2}",  new System.Globalization.CultureInfo("de-DE"));
 
                 Assert.AreEqual(result.DateRange.TotalDays, 365);
             }
@@ -99,7 +99,7 @@ namespace MathExpressinTests
             {
                 var d1 = new DateTime(2020, 01, 01).ToString("dd.MM.yyyy");
                 var d2 = new DateTime(2019, 01, 01).ToString("dd.MM.yyyy");
-                var result = ExpressionEvaluator.EvaluateExpression($"days({d1} - {d2})");
+                var result = ExpressionEvaluator.EvaluateExpression($"days({d1} - {d2})", new System.Globalization.CultureInfo("de-DE"));
 
                 Assert.AreEqual(result.Number, 365);
             }
@@ -108,7 +108,7 @@ namespace MathExpressinTests
             public void DateYearTest()
             {
                 var d1 = new DateTime(2021, 01, 01).ToString("dd.MM.yyyy");
-                var result = ExpressionEvaluator.EvaluateExpression($"Year({d1})");
+                var result = ExpressionEvaluator.EvaluateExpression($"Year({d1})", new System.Globalization.CultureInfo("de-DE"));
 
                 Assert.AreEqual(result.ToString(), "2021");
             }
@@ -132,7 +132,7 @@ namespace MathExpressinTests
                 var d1 = "01.01.2020";
                 var d2 = "31.12.2020";
                 var d3 = "15.06.2020";
-                var result = ExpressionEvaluator.EvaluateExpression($"{d3} BETWEEN {d1} AND {d2}");
+                var result = ExpressionEvaluator.EvaluateExpression($"{d3} BETWEEN {d1} AND {d2}", new System.Globalization.CultureInfo("de-DE"));
 
                 Assert.IsTrue(result.Boolean);
             }
@@ -157,7 +157,7 @@ namespace MathExpressinTests
                 var d2 = new DateTime(2020, 01, 01).ToString("dd.MM.yyyy");
                 var ex = $"Years({d1} - {d2}) >= 1";
                 Console.WriteLine(ex);
-                var result = ExpressionEvaluator.EvaluateExpression(ex);
+                var result = ExpressionEvaluator.EvaluateExpression(ex, new System.Globalization.CultureInfo("de-DE"));
 
                 Assert.IsTrue(result.Boolean);
             }
@@ -167,7 +167,7 @@ namespace MathExpressinTests
             {
                 var d1 = "01.01.2021";
                 var d2 = "01.01.2020";
-                var result = ExpressionEvaluator.EvaluateExpression($"Years({d1} - {d2}) >= 1");
+                var result = ExpressionEvaluator.EvaluateExpression($"Years({d1} - {d2}) >= 1", new System.Globalization.CultureInfo("de-DE"));
 
                 Assert.IsTrue(result.Boolean);
             }
@@ -202,7 +202,7 @@ namespace MathExpressinTests
                 { "ResultText", "Your Right!" }
             };
 
-                var result = ExpressionEvaluator.EvaluateExpression($"IF FirstVar < SecondVar THEN ResultText", values);
+                var result = ExpressionEvaluator.EvaluateExpression($"IF FirstVar < SecondVar THEN ResultText", values,  new System.Globalization.CultureInfo("en-EN"));
 
                 Assert.AreEqual(result.Text, values["ResultText"]);
             }
@@ -229,7 +229,7 @@ namespace MathExpressinTests
                     @"ELSE 1";
 
 
-                var result = ExpressionEvaluator.EvaluateExpression(expression);
+                var result = ExpressionEvaluator.EvaluateExpression(expression, new System.Globalization.CultureInfo("de-DE"));
 
                 Assert.AreEqual(result.ToString(), "2");
             }

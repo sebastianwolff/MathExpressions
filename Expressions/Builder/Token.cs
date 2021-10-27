@@ -27,6 +27,7 @@ namespace Expressionator.Expressions.Builder
 
 			Contains,
 			Date,
+			Time,
 
 			DblPeriod,
 			Period,
@@ -97,6 +98,14 @@ namespace Expressionator.Expressions.Builder
 			get
 			{
 				return _dateValue.Date;
+			}
+		}
+
+		public DateTime DateTimeValue
+		{
+			get
+			{
+				return _dateValue;
 			}
 		}
 
@@ -186,11 +195,11 @@ namespace Expressionator.Expressions.Builder
 			_column = column;
 		}
 
-		public Token(DateTime date, int line, int column)
+		public Token(DateTime date, int line, int column, bool isTime = false)
 		{
-			_type = Type.Date;
+			_type = isTime ? Type.Time : Type.Date;
 			_typeCode = TypeCode.DateTime;
-			_stringValue = date.ToString();
+			_stringValue = isTime ? date.ToShortTimeString() : date.ToString();
 			_numberValue = date.Ticks;
 			_dateValue = date;
 

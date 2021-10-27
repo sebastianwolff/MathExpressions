@@ -167,6 +167,13 @@ namespace Expressionator.Expressions
 					&& Compare(roundCast.Expression, ((RoundCastExpr)secondary).Expression) == 0)
 				result = 0;
 		}
-		#endregion
-	}
+
+        public void Visit(TimeExpr time)
+        {
+			if (time.GetType() == secondary.GetType()
+					 && time.Time == ((TimeExpr)secondary).Time)
+				result = (time.Time.Ticks - ((TimeExpr)secondary).Time.Ticks);
+		}
+        #endregion
+    }
 }

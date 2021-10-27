@@ -4,8 +4,14 @@ A simple .NET 5 Math Expression Parser / Interpreter.
 This library interprets mathematical expressions from text input. 
 
 ## Important Note on Localization
-> Currently the Lib expects German localized input Strings (e.g. for Numbers:  Use 2,5 instead 2.5 and Dates in Format dd.mm.yyy )
+
+**Before Version 1.1.xx**
+> The Lib expects German localized input Strings (e.g. for Numbers:  Use 2,5 instead 2.5 and Dates in Format dd.mm.yyy )
 > Will be corrected/extended in one of the next versions
+
+**Since Version 1.1.xx**
+> Localization added. See Chapter **Localization**
+
 
 ### Basic functions
 
@@ -14,6 +20,7 @@ This library interprets mathematical expressions from text input.
 - Date calculations (Range)
 - Extract Date parts (month, day, year)
 - Conditional statement  IF THEN ELSE
+- Date and Floating Value Localization
 
 ## Installation
 
@@ -21,9 +28,33 @@ Get the current Version from NuGet or build it from this GitHub Source
 
 [MathExpression.net on nuget.org](https://www.nuget.org/packages/MathExpression.net/)
 
-## Examples
+## Localization
 
-### Basic Math
+Localization is supported since version 1.1.xx. The default localization is invariant. To set your preferred localization for floating point numbers and date strings, add a CultureInfo as the last parameter to the EvaluateExpression call.
+
+### Example
+````C#
+
+var deCulture = new CultureInfo("de-DE");
+var result = ExpressionEvaluator.EvaluateExpression<DateTime>("01.01.2021", deCulture);
+            
+````
+
+## Basic Math
+
+All Basic Math Operators are supported. 
+
+ \+ = Addition
+
+ \- = Subtraction
+ 
+ \\ = Dividing
+ 
+ \* = Multiplication  
+ 
+ \^ = Exponentiation 
+
+### Examples
 
 #### Simple Math
 ````C#
@@ -45,10 +76,11 @@ ____________________________________
             
 ````
 
-### Conditional
+## Conditions
 
-You can define a conditional Expression (IF->THEN->ELSE) for special purposes  
+You can define a conditional Expressions (IF->THEN->ELSE) for special purposes  
 
+## Examples
 #### If Then Else
 
 ```` C#
@@ -65,10 +97,18 @@ ____________________________________
 // result.ToString() -> "Yes, it´s true!");
 ````
 
-### String
+## Strings / Text
 
+Text can be compared or merged. 
 
-#### String Comparsion
+**Possible Opperands:**
+
+\+ : Concat Text
+
+\= : Text Equals 
+
+### Examples
+#### String Compare
 ````C#
 
 var result = ExpressionEvaluator.EvaluateExpression("'MyString' = 'MyString'");
@@ -77,7 +117,7 @@ ____________________________________
 
 ````
 
-#### String Combine
+#### String Concat
 ````C#
 
 var result = ExpressionEvaluator.EvaluateExpression("'MyString' + 'MyString'");
@@ -86,8 +126,26 @@ ____________________________________
 
 ````
 
-### Date
+## Date
 
+There are a number of date functions.
+- Date Substraction
+- Date Comparsion (=, >, >=, <, <=)
+
+Also some Conversion- and Datepartextraction functions for results from date operations are available.
+
+**Partial Result**
+- days(date1 - date2) -> Gets the number of Days between to Dates
+- months(date1 - date2) -> Gets the number of month between to Dates
+- years(date1 - date2) -> Gets the number of Years between to Dates
+
+**Dateparts:**
+- day(date1) -> Gets the Day of the given Date
+- month(date1) -> Gets the Month of the given Date
+- year(date1) -> Gets the Year of the given Date
+
+
+### Examples
 #### Date Calculation
 
 ```` C#
@@ -126,6 +184,12 @@ ____________________________________
 ````
 
 ### Between 
+
+You can check for dates and numbers if they are in the range of an given pair
+
+**Syntax:** 
+
+[MyValue] BETWEEN [RangeStart_Value] AND [RangeEnd_Value]
 
 #### Between Date
 ````C#

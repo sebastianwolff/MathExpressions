@@ -11,7 +11,10 @@ namespace Expressionator.Expressions
 			None,
 			Day,
 			Month,
-			Year
+			Year,
+			Hour,
+			Minute,
+			Second
 		}
 
 		private readonly Units _unit;

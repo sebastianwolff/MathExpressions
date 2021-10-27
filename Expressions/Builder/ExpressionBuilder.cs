@@ -2,6 +2,11 @@ using System;
 using System.IO;
 using System.Text;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Text.RegularExpressions;
+using MathExpressinTests;
+using System.Linq;
+using System.Diagnostics;
 
 /** 
  * EBNF-alike syntax:
@@ -47,16 +52,18 @@ namespace Expressionator.Expressions.Builder
 	/// being responsible for parsing input strings and 
 	/// compiling equivalent expression trees from these inputs.
 	/// </summary>
-	public class ExpressionBuilder : IExpressionBuilder
+	public  class ExpressionBuilder : IExpressionBuilder
 	{
 		/// <summary>
 		/// Use this method for convience
 		/// </summary>
 		/// <param name="pattern">the expression in form of a mathematical pattern</param>
+		/// <param name="culture">Cultureinfo for Localization of Numbers and Dates</param>
 		/// <returns>the compiled expression tree</returns>
-		public static Node ParseExpression(string pattern)
+		public static Node ParseExpression(string pattern, CultureInfo culture = null)
 		{
-			var builder = new ExpressionBuilder();
+			culture ??= CultureInfo.InvariantCulture;
+			var builder = new ExpressionBuilder(culture);
 
 			return builder.Parse(pattern);
 		}
@@ -70,7 +77,7 @@ namespace Expressionator.Expressions.Builder
 
 			if (currentToken.TokenType != Token.Type.None)
 				throw new UnexpectedTokenException(currentToken.StringValue, currentToken.Line, currentToken.Column);
-
+			
 			return result;
 		}
 		#endregion
@@ -326,6 +333,17 @@ namespace Expressionator.Expressions.Builder
 							case "jahre":
 							case "years":
 									return new TimeSpanCastExpr(TimeSpanCastExpr.Units.Year, arg);
+							case "hours":
+							case "stunden":
+								return new TimeSpanCastExpr(TimeSpanCastExpr.Units.Hour, arg);
+							case "minutes":
+							case "minuten":
+								return new TimeSpanCastExpr(TimeSpanCastExpr.Units.Minute, arg);
+							case "sekunden":
+							case "seconds":
+								return new TimeSpanCastExpr(TimeSpanCastExpr.Units.Second, arg);
+
+
 							case "jahr":
 							case "year":
 								return new DateQualExpr(DateQualExpr.Quals.Year, arg);
@@ -335,6 +353,15 @@ namespace Expressionator.Expressions.Builder
 							case "tag":
 							case "day":
 									return new DateQualExpr(DateQualExpr.Quals.Day, arg);
+							case "stunde":
+							case "hour":
+								return new DateQualExpr(DateQualExpr.Quals.Hour, arg);
+							case "minute":
+								return new DateQualExpr(DateQualExpr.Quals.Minute, arg);
+							case "second":
+							case "sekunde":
+								return new DateQualExpr(DateQualExpr.Quals.Second, arg);
+							
 							case "round":
 									var precisionString = symbolName.ToLower().Replace("round", "");
 
@@ -345,7 +372,6 @@ namespace Expressionator.Expressions.Builder
 									if (!int.TryParse(precisionString, out int precision))
                                     	throw new UnknownPrecisionException($"{precisionString}");
 									
-
 									return new RoundCastExpr(precision, arg);
 						
 						}
@@ -361,6 +387,12 @@ namespace Expressionator.Expressions.Builder
 					NextToken();
 					return result;
 				}
+				case Token.Type.Time:
+					{
+						Node result = new TimeExpr(currentToken.DateTimeValue);
+						NextToken();
+						return result;
+					}
 				case Token.Type.Text: {
 					Node result = new TextNode(currentToken.StringValue);
 					NextToken();
@@ -410,24 +442,29 @@ namespace Expressionator.Expressions.Builder
 		#endregion
 
 		#region lexical analizing
-		private TextReader input;
+		private char[] input;
 		private int line;
 		private int column;
 		private int currentChar;
+		private long currentPos = 0;
 		private Token currentToken;
-
+	
 		private int PeekedNextChar
 		{
 			get
 			{
-				return input.Peek();
+				return input.Peek(currentPos);
 			}
 		}
 
+		
+
+        private CultureInfo Culture { get; set; }
+
 		private void InitializeLexer(string pattern)
 		{
-			input = new StringReader(pattern);
-
+			input = pattern.ToCharArray();
+			
 			line = 1;
 			column = 0;
 			currentChar = 0;
@@ -447,7 +484,63 @@ namespace Expressionator.Expressions.Builder
 			{
 				++column;
 			}
-			return currentChar = input.Read();
+			return currentChar = input.Read(ref currentPos);
+		}
+
+		/// <summary>
+		/// Indicates if the Char is not Part of a Number or Date
+		/// </summary>
+		/// <param name="currentChar">The Char</param>
+		/// <param name="couldBeDate">Could the current char series be a DateTime</param>
+		/// <returns></returns>
+		public bool IsIntDateStopToken(int currentChar, bool couldBeDate)
+        {
+			
+			List<int> expect = new() { Culture.NumberFormat.NumberDecimalSeparator[0], Culture.NumberFormat.NumberGroupSeparator[0] };
+
+			//Prevent Misinterpretation of "/" as DatePart instead of Division 
+			if (couldBeDate)
+			{
+				expect.Add(Culture.DateTimeFormat.DateSeparator[0]);
+				expect.Add(Culture.DateTimeFormat.TimeSeparator[0]);
+			}
+
+			if ( expect.Contains(currentChar))
+			{
+				return false;
+			}
+
+			switch (currentChar)
+			{
+				case -1: 
+				case ' ':
+				case '\n':
+				case '\r':
+				case '+':
+				case '*':
+				case '^':
+				case '(':
+				case ')':
+				case '{':
+				case '[':
+				case ']':
+				case '}':
+				case '!':
+				case '<':
+				case '>':
+				case '=':
+				case ':':
+				case '\'':
+				case '"':
+				case '-':
+				case '/':
+				case '.':
+				case ',':
+					return true;
+				default:
+					return false;
+			}
+
 		}
 
 		private Token NextToken()
@@ -573,7 +666,12 @@ namespace Expressionator.Expressions.Builder
 
 		private static readonly Dictionary<string, Token.Type> keywords = CreateKeywordMappings();
 
-		private static Dictionary<string, Token.Type> CreateKeywordMappings()
+        public ExpressionBuilder(CultureInfo culture)
+        {
+            Culture = culture;
+        }
+
+        private static Dictionary<string, Token.Type> CreateKeywordMappings()
 		{
             Dictionary<string, Token.Type> keywords = new()
             {
@@ -618,22 +716,7 @@ namespace Expressionator.Expressions.Builder
 			return IsAlpha(ch) || ch == '_';
 		}
 
-		private Token ParseSimpleNumber()
-		{
-			int _line = line;
-			int _column = column;
-
-			var sb = new StringBuilder(10);
-
-			for (; IsDigit(currentChar); NextChar())
-				sb.Append((char)currentChar);
-
-			if (sb.Length == 0)
-				throw new UnexpectedTokenException(sb.ToString(), _line, _column); // XXX parsed string is empty... might be confusing!
-
-			return new Token(Convert.ToInt32(sb.ToString()), _line, _column);
-		}
-
+		
 		/*
 		 * NUMBER       ::= DIGIT... [('.' | ',') DIGIT...]
 		 * 
@@ -643,82 +726,173 @@ namespace Expressionator.Expressions.Builder
 		 * 
 		 * DIGIT        ::= '0'..'9'
 		 */
-		private Token ParseNumberOrDate() 
-		{
-			int _line = line;
-			int _column = column;
+		private Token ParseNumberOrDate()
+        {
+            int _line = line;
+            int _column = column;
 
-			var sb = new StringBuilder(10);
+			BuildNumberDateSeries(out string buildedString, out bool isDateOrTimeFormat, out bool isTimePattern);
 
-			for (; IsDigit(currentChar); NextChar())
-				sb.Append((char)currentChar);
+            ///Add Datepart to the TimePart
+            buildedString = (isDateOrTimeFormat && isTimePattern) ?
+                $"{DateTime.MinValue.ToString(Culture.DateTimeFormat.ShortDatePattern)} {TimeFormatWithSeconds(buildedString)}"
+                : buildedString;
 
-			// it MAY be a date
-			if (currentChar == '.' && sb.Length >= 1 && sb.Length <= 2 && PeekedNextChar != '.')
-			{
-				int dayLength = sb.Length; // DD.
+            ///Add TimePart to the TimePart
+    //        buildedString = (isDateOrTimeFormat && !isTimePattern) ?
+				//$"{buildedString} {DateTime.MinValue.ToString(Culture.DateTimeFormat.LongTimePattern)}"
+				//: buildedString;
 
-				sb.Append('.');
 
-				for (NextChar(); IsDigit(currentChar); NextChar()) // possibly MM (or the .floating point value)
-					sb.Append((char)currentChar);
+			if (isDateOrTimeFormat && DateTime.TryParse(buildedString,Culture,DateTimeStyles.None, out DateTime dateValue))
+            {
+                return new Token(dateValue, _line, _column, isTimePattern);
+            }
 
-				if (currentChar == '.' && sb.Length >= dayLength + 2 && sb.Length <= dayLength + 3)
-				{
-					int dayMonthLength = sb.Length; // DD.MM. has been parsed already
+			NumberStyles numberStyles = NumberStyles.AllowDecimalPoint | NumberStyles.Number;
 
-					sb.Append('.');
+            if (Double.TryParse(buildedString, numberStyles, Culture, out double doubleValue))
+            {
+                return new Token(doubleValue, _line, _column);
+            }
 
-					for (NextChar(); IsDigit(currentChar); NextChar())
-						sb.Append((char)currentChar);
+            throw new Exception("Invalid date/number format in expression.");
+        }
 
-					if (sb.Length != dayMonthLength + 5)
-						throw new Exception("Invalid date/number format in expression.");
+        private object TimeFormatWithSeconds(string buildedString)
+        {
+			return (buildedString.Length == 5) ? $"{buildedString}{Culture.DateTimeFormat.TimeSeparator}00" : buildedString;
 
-					string pattern = sb.ToString();
-					int day = Int32.Parse(pattern.Substring(0, dayLength));
-					int month = Int32.Parse(pattern.Substring(dayLength + 1, dayMonthLength - (dayLength + 1)));
-					int year = Int32.Parse(pattern.Substring(sb.Length - dayMonthLength + 1));
-
-					// check wether we got a fully qualified date-time or just a date-without-time ...
-					SkipWhiteSpaces();
-					if (!IsDigit(currentChar) || !IsDigit(PeekedNextChar))
-						return new Token(new DateTime(year, month, day), _line, _column);
-
-					int hour = (int)ParseSimpleNumber().NumberValue;
-
-					NextToken();
-					Consume(Token.Type.Colon, false);
-
-					int minute = (int)ParseSimpleNumber().NumberValue;
-
-					NextToken();
-					Consume(Token.Type.Colon, false);
-
-					int second = (int)ParseSimpleNumber().NumberValue;
-
-					// XXX: Aktuell werden die ZEIT-Werte eh vom DateExpr node weggeschnitten,
-					// jedoch ergibt sich offenbar die Not Zeit formate mit parsen zu muessen *und*
-					// zu ignorieren. Soll der Kunde entscheiden, ob er sie braucht oder nicht;
-					// Ggf. werden die intermediate form anpassen.
-					return new Token(new DateTime(year, month, day, hour, minute, second), _line, _column);
-				}
-			}
-			else if ((currentChar == '.' && PeekedNextChar != '.') || currentChar == ',')
-			{
-				sb.Append((char)currentChar);
-				NextChar();
-
-				for (; IsDigit(currentChar); NextChar())
-					sb.Append((char)currentChar);
-			}
-
-			return new Token(Double.Parse(sb.ToString()), _line, _column);
 		}
 
-		// SYMBOL ::= ALPHA_ [ALPHA_ | DIGIT]...
-		// ALPHA_ ::= 'a'..'z' | 'A'..'Z' | '_'
-		private string ParseSymbol()
+        private void BuildNumberDateSeries(out string buildedString, out bool isDateOrTimeFormat, out bool isTimePattern)
+        {
+            var sb = new StringBuilder(100);
+			
+			isTimePattern = IsTimePattern();
+			isDateOrTimeFormat = IsDatePattern() || isTimePattern;
+
+            while (IsValidForDateOrInt(currentChar, isDateOrTimeFormat))
+            {
+                sb.Append((char)currentChar);
+                NextChar();
+            }
+
+			buildedString = sb.ToString();
+        }
+
+        private bool CouldBeADateOrTime()
+        {
+		
+			return IsDatePattern() || IsTimePattern();
+			
+		}
+
+		private bool IsDatePattern()
+        {
+			var dateSeperator = Culture.DateTimeFormat.DateSeparator[0];
+			var datePattern = CleanDatePattern(Culture.DateTimeFormat.ShortDatePattern);
+			
+			var dateSeperatorFirstPosition = datePattern.IndexOf(dateSeperator);
+			var dateSeperatorLastPosition = datePattern.LastIndexOf(dateSeperator);
+
+			var invalidChar = false;
+			var isDate = false;
+
+			for (int i = 0; i < 11; i++)
+			{
+				var charAtPosition = input.PeekSkip(currentPos, i - 1);
+				if (i == datePattern.Length) 
+					isDate = !invalidChar && !IsValidForDateOrInt(charAtPosition, true);
+
+				if (i == dateSeperatorFirstPosition || i == dateSeperatorLastPosition)
+				{
+					//Expect Time Seperator at this Position!
+					invalidChar = (charAtPosition != dateSeperator) || invalidChar;
+				}
+				else
+				{
+					invalidChar = (!IsValidForDateOrInt(charAtPosition, false)) || invalidChar;
+				}
+				//if (invalidChar) Debugger.Break();
+
+			}
+
+
+			return isDate;
+
+
+		}
+
+		private bool IsTimePattern()
+		{
+			var timeSeperator = Culture.DateTimeFormat.TimeSeparator[0];
+			var timePattern = Culture.DateTimeFormat.LongTimePattern;
+
+			var timeSeperatorFirstPosition = timePattern.IndexOf(timeSeperator);
+			var timeSeperatorLastPosition = timePattern.LastIndexOf(timeSeperator);
+
+			var invalidChar = false;
+
+			//Format 00:00
+			var isTwoBlocksTime = false;
+			//Format 00:00:00 
+			var isThreeBlocksTime = false;
+
+			for (int i = 0; i < 9; i++)
+			{
+				var charAtPosition = input.PeekSkip(currentPos, i-1);
+                if (i == 5) isTwoBlocksTime = !invalidChar && !IsValidForDateOrInt(charAtPosition, true);
+				if (i == 8) isThreeBlocksTime = !invalidChar && !IsValidForDateOrInt(charAtPosition, true);
+		
+				if (i == timeSeperatorFirstPosition || i == timeSeperatorLastPosition)
+				{
+					//Expect Time Seperator at this Position!
+					invalidChar = (charAtPosition != timeSeperator) || invalidChar;
+                }
+                else
+                {
+					invalidChar = (!IsValidForDateOrInt( charAtPosition, false)) || invalidChar;
+				}
+
+			}
+
+
+			return isTwoBlocksTime || isThreeBlocksTime;
+
+		}
+
+
+		/// <summary>
+		/// DatePatterns can contain single d and M ... here we clean it up to get the correct potiion
+		/// </summary>
+		/// <param name="datePattern"></param>
+		/// <returns></returns>
+		private static string CleanDatePattern(string datePattern)
+        {
+			if (datePattern.Count(p => p == 'M') == 1)
+				datePattern = datePattern.Replace("M", "MM");
+
+			if (datePattern.Count(p => p == 'd') == 1)
+				datePattern = datePattern.Replace("d", "dd");
+
+			if (datePattern.Count(p => p == 'y') == 2)
+				datePattern = datePattern.Replace("yy", "yyyy");
+			
+			return datePattern;
+		}
+
+        public bool IsValidForDateOrInt(int currentChar, bool couldBeDate)
+        {
+			var valid = false;
+			valid = IsDigit(currentChar) || valid;
+			valid = !IsIntDateStopToken(currentChar, couldBeDate) || valid;
+			return valid;
+        }
+
+        // SYMBOL ::= ALPHA_ [ALPHA_ | DIGIT]...
+        // ALPHA_ ::= 'a'..'z' | 'A'..'Z' | '_'
+        private string ParseSymbol()
 		{
 			var sb = new StringBuilder(16);
 

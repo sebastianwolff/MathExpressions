@@ -10,7 +10,10 @@ namespace Expressionator.Expressions
 		{
 			Day,
 			Month,
-			Year
+			Year,
+			Hour, 
+			Minute, 
+			Second
 		}
 
 		private readonly Node _subExpression;
