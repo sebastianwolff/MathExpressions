@@ -3,6 +3,7 @@ using Expressionator.Expressions.Evaluator;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace MathExpressinTests
 {
@@ -12,6 +13,11 @@ namespace MathExpressinTests
         [TestClass()]
         public class ExpressionEvaluatorTests
         {
+
+            private static readonly CultureInfo de = new CultureInfo("de-DE");
+            private static readonly CultureInfo en = new CultureInfo("en-EN");
+            private static readonly CultureInfo gb = new CultureInfo("en-GB");
+            private static readonly CultureInfo us = new CultureInfo("en-US");
 
 
             [TestMethod()]
@@ -51,7 +57,7 @@ namespace MathExpressinTests
             public void UnknownRoundPrecisionTest()
             {
                 var d1 = "0,2";
-                ExpressionEvaluator.EvaluateExpression($"roundFALSE1({d1})", new System.Globalization.CultureInfo("de-DE"));
+                ExpressionEvaluator.EvaluateExpression($"roundFALSE1({d1})", de);
             }
 
             [TestMethod()]
@@ -61,23 +67,23 @@ namespace MathExpressinTests
                 var d2 = "0,5126";
                 var d3 = "0,5";
 
-                var result = ExpressionEvaluator.EvaluateExpression($"round({d1})", new System.Globalization.CultureInfo("de-DE"));
+                var result = ExpressionEvaluator.EvaluateExpression($"round({d1})", de);
                 Assert.AreEqual(result.Number, 0);
 
-                result = ExpressionEvaluator.EvaluateExpression($"round({d2})", new System.Globalization.CultureInfo("de-DE"));
+                result = ExpressionEvaluator.EvaluateExpression($"round({d2})", de);
                 Assert.AreEqual(result.Number, 1);
 
-                result = ExpressionEvaluator.EvaluateExpression($"round({d3})", new System.Globalization.CultureInfo("de-DE"));
+                result = ExpressionEvaluator.EvaluateExpression($"round({d3})", de);
                 Assert.AreEqual(result.Number, 0);
 
-                result = ExpressionEvaluator.EvaluateExpression($"round1({d2})", new System.Globalization.CultureInfo("de-DE"));
+                result = ExpressionEvaluator.EvaluateExpression($"round1({d2})", de);
                 Assert.AreEqual(result.Number, 0.5);
 
-                result = ExpressionEvaluator.EvaluateExpression($"round2({d2})", new System.Globalization.CultureInfo("de-DE"));
+                result = ExpressionEvaluator.EvaluateExpression($"round2({d2})", de);
                 Assert.AreEqual(result.Number, 0.51);
 
 
-                result = ExpressionEvaluator.EvaluateExpression($"round3({d2})", new System.Globalization.CultureInfo("de-DE"));
+                result = ExpressionEvaluator.EvaluateExpression($"round3({d2})", de);
                 Assert.AreEqual(result.Number, 0.513);
 
 
@@ -89,7 +95,7 @@ namespace MathExpressinTests
             {
                 var d1 = new DateTime(2020, 01, 01).ToString("dd.MM.yyyy");
                 var d2 = new DateTime(2019, 01, 01).ToString("dd.MM.yyyy");
-                var result = ExpressionEvaluator.EvaluateExpression($"{d1} - {d2}",  new System.Globalization.CultureInfo("de-DE"));
+                var result = ExpressionEvaluator.EvaluateExpression($"{d1} - {d2}",  de);
 
                 Assert.AreEqual(result.DateRange.TotalDays, 365);
             }
@@ -99,7 +105,7 @@ namespace MathExpressinTests
             {
                 var d1 = new DateTime(2020, 01, 01).ToString("dd.MM.yyyy");
                 var d2 = new DateTime(2019, 01, 01).ToString("dd.MM.yyyy");
-                var result = ExpressionEvaluator.EvaluateExpression($"days({d1} - {d2})", new System.Globalization.CultureInfo("de-DE"));
+                var result = ExpressionEvaluator.EvaluateExpression($"days({d1} - {d2})", de);
 
                 Assert.AreEqual(result.Number, 365);
             }
@@ -108,7 +114,7 @@ namespace MathExpressinTests
             public void DateYearTest()
             {
                 var d1 = new DateTime(2021, 01, 01).ToString("dd.MM.yyyy");
-                var result = ExpressionEvaluator.EvaluateExpression($"Year({d1})", new System.Globalization.CultureInfo("de-DE"));
+                var result = ExpressionEvaluator.EvaluateExpression($"Year({d1})", de);
 
                 Assert.AreEqual(result.ToString(), "2021");
             }
@@ -132,7 +138,7 @@ namespace MathExpressinTests
                 var d1 = "01.01.2020";
                 var d2 = "31.12.2020";
                 var d3 = "15.06.2020";
-                var result = ExpressionEvaluator.EvaluateExpression($"{d3} BETWEEN {d1} AND {d2}", new System.Globalization.CultureInfo("de-DE"));
+                var result = ExpressionEvaluator.EvaluateExpression($"{d3} BETWEEN {d1} AND {d2}", de);
 
                 Assert.IsTrue(result.Boolean);
             }
@@ -157,7 +163,7 @@ namespace MathExpressinTests
                 var d2 = new DateTime(2020, 01, 01).ToString("dd.MM.yyyy");
                 var ex = $"Years({d1} - {d2}) >= 1";
                 Console.WriteLine(ex);
-                var result = ExpressionEvaluator.EvaluateExpression(ex, new System.Globalization.CultureInfo("de-DE"));
+                var result = ExpressionEvaluator.EvaluateExpression(ex, de);
 
                 Assert.IsTrue(result.Boolean);
             }
@@ -167,7 +173,7 @@ namespace MathExpressinTests
             {
                 var d1 = "01.01.2021";
                 var d2 = "01.01.2020";
-                var result = ExpressionEvaluator.EvaluateExpression($"Years({d1} - {d2}) >= 1", new System.Globalization.CultureInfo("de-DE"));
+                var result = ExpressionEvaluator.EvaluateExpression($"Years({d1} - {d2}) >= 1", de);
 
                 Assert.IsTrue(result.Boolean);
             }
@@ -202,7 +208,7 @@ namespace MathExpressinTests
                 { "ResultText", "Your Right!" }
             };
 
-                var result = ExpressionEvaluator.EvaluateExpression($"IF FirstVar < SecondVar THEN ResultText", values,  new System.Globalization.CultureInfo("en-EN"));
+                var result = ExpressionEvaluator.EvaluateExpression($"IF FirstVar < SecondVar THEN ResultText", values,  en);
 
                 Assert.AreEqual(result.Text, values["ResultText"]);
             }
@@ -218,9 +224,10 @@ namespace MathExpressinTests
             [TestMethod()]
             public void ComplexTest()
             {
-                var d1 = new DateTime(2021, 01, 01).ToString("dd.MM.yyyy");
-                var d2 = new DateTime(2020, 01, 01).ToString("dd.MM.yyyy");
-                var d3 = new DateTime(2020, 06, 01).ToString("dd.MM.yyyy");
+
+                var d1 = new DateTime(2021, 01, 01).ToString(de.DateTimeFormat.ShortDatePattern);
+                var d2 = new DateTime(2020, 01, 01).ToString(de.DateTimeFormat.ShortDatePattern);
+                var d3 = new DateTime(2020, 06, 01).ToString(de.DateTimeFormat.ShortDatePattern);
 
                 var expression = @"IF " +
                     @" 1 > 0 " +
@@ -229,7 +236,7 @@ namespace MathExpressinTests
                     @"ELSE 1";
 
 
-                var result = ExpressionEvaluator.EvaluateExpression(expression, new System.Globalization.CultureInfo("de-DE"));
+                var result = ExpressionEvaluator.EvaluateExpression(expression, de);
 
                 Assert.AreEqual(result.ToString(), "2");
             }

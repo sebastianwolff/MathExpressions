@@ -8,23 +8,26 @@ namespace MathExpressinTests
 {
     public static class CharArrayExtensions
     {
-        public static int Peek(this char[] chars, long currentPos)
+
+        private static char nullvalue = (char)0;
+        public static ref char Peek(this char[] chars, long currentPos)
         {
             if (currentPos + 1 > chars.Length)
             {
-                return -1;
+                return ref nullvalue;
             }
-            return chars[currentPos];
+
+            return ref chars[currentPos];
         }
 
-        public static int Read(this char[] chars, ref long currentPos)
+        public static ref char Read(this char[] chars, ref long currentPos)
         {
             currentPos++;
             if (currentPos > chars.Length)
             {
-                return -1;
+                return ref nullvalue;
             }
-            return chars[currentPos -1];
+            return ref chars[currentPos -1];
         }
 
         /// <summary>
@@ -32,14 +35,14 @@ namespace MathExpressinTests
 		/// </summary>
 		/// <param name="stepOver"></param>
 		/// <returns></returns>
-		public static int PeekSkip(this char[] chars, long currentPos, long stepOver)
+		public static ref char PeekSkip(this char[] chars, long currentPos, long stepOver)
         {
             if (currentPos + stepOver >= chars.Length)
             {
-                return -1;
+                return ref nullvalue;
             }
 
-            return chars[currentPos + stepOver];
+            return ref chars[currentPos + stepOver];
 
         }
     }

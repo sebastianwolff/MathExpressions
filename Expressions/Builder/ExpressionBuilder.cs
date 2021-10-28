@@ -512,7 +512,8 @@ namespace Expressionator.Expressions.Builder
 
 			switch (currentChar)
 			{
-				case -1: 
+				case -1:
+				case (char)0:
 				case ' ':
 				case '\n':
 				case '\r':
@@ -658,7 +659,7 @@ namespace Expressionator.Expressions.Builder
 
 			// unknown character or EOF reached
 
-			if (currentChar == -1)
+			if (currentChar == -1 || currentChar == (char)0)
 				return currentToken = new Token(Token.Type.None, line, column);
 
 			throw new UnexpectedTokenException(String.Format("{0}", (char)currentChar), line, column);
@@ -735,16 +736,18 @@ namespace Expressionator.Expressions.Builder
 
             ///Add Datepart to the TimePart
             buildedString = (isDateOrTimeFormat && isTimePattern) ?
-                $"{DateTime.MinValue.ToString(Culture.DateTimeFormat.ShortDatePattern)} {TimeFormatWithSeconds(buildedString)}"
+                $"{DateTime.MinValue.ToString(CleanDatePattern(Culture.DateTimeFormat.ShortDatePattern))} {TimeFormatWithSeconds(buildedString)}"
                 : buildedString;
 
-            ///Add TimePart to the TimePart
-    //        buildedString = (isDateOrTimeFormat && !isTimePattern) ?
-				//$"{buildedString} {DateTime.MinValue.ToString(Culture.DateTimeFormat.LongTimePattern)}"
-				//: buildedString;
+			
+			///Add TimePart to the Datepart
+			buildedString = (isDateOrTimeFormat && !isTimePattern) ?
+			$"{AddTrailingZeros(buildedString, Culture.DateTimeFormat.DateSeparator[0])} {DateTime.MinValue.ToString(CleanTimePattern(Culture.DateTimeFormat.LongTimePattern))}"
+			: buildedString;
 
+			var dateTimeFormat = $"{CleanDatePattern(Culture.DateTimeFormat.ShortDatePattern)} {CleanTimePattern(Culture.DateTimeFormat.LongTimePattern)}";
 
-			if (isDateOrTimeFormat && DateTime.TryParse(buildedString,Culture,DateTimeStyles.None, out DateTime dateValue))
+			if (isDateOrTimeFormat && buildedString.TryGetDate(dateTimeFormat, out DateTime dateValue))
             {
                 return new Token(dateValue, _line, _column, isTimePattern);
             }
@@ -759,11 +762,47 @@ namespace Expressionator.Expressions.Builder
             throw new Exception("Invalid date/number format in expression.");
         }
 
-        private object TimeFormatWithSeconds(string buildedString)
+        private static string CleanTimePattern(string longTimePattern)
         {
-			return (buildedString.Length == 5) ? $"{buildedString}{Culture.DateTimeFormat.TimeSeparator}00" : buildedString;
+			if (longTimePattern.Count(p => p == 'h') == 1)
+				longTimePattern = longTimePattern.Replace("h", "hh");
 
-		}
+			if (longTimePattern.Count(p => p == 'H') == 1)
+				longTimePattern = longTimePattern.Replace("H", "HH");
+
+
+			if (longTimePattern.Count(p => p == 'm') == 1)
+				longTimePattern = longTimePattern.Replace("m", "mm");
+
+			if (longTimePattern.Count(p => p == 's') == 1)
+				longTimePattern = longTimePattern.Replace("s", "ss");
+
+			return longTimePattern.Replace("tt", "").Trim();
+        }
+
+        private string TimeFormatWithSeconds(string buildedString)
+        {
+            buildedString = AddTrailingZeros(buildedString, Culture.DateTimeFormat.TimeSeparator[0]); 
+            return (buildedString.Length == 5) ? $"{buildedString}{Culture.DateTimeFormat.TimeSeparator}00" : buildedString;
+        }
+
+        private static string AddTrailingZeros(string buildedString, char seperator)
+        {
+            var splitted = buildedString.Split(seperator);
+            var newBuildedString = new StringBuilder();
+            for (int i = 0; i < splitted.Length; i++)
+            {
+				//Add trailing zero
+                newBuildedString.Append((splitted[i].Length == 1) ? "0" + splitted[i] : splitted[i]);
+                if (i<splitted.Length-1)
+                {
+					newBuildedString.Append(seperator);
+				}
+				
+            }
+
+			return newBuildedString.ToString(); ;
+        }
 
         private void BuildNumberDateSeries(out string buildedString, out bool isDateOrTimeFormat, out bool isTimePattern)
         {
@@ -781,13 +820,6 @@ namespace Expressionator.Expressions.Builder
 			buildedString = sb.ToString();
         }
 
-        private bool CouldBeADateOrTime()
-        {
-		
-			return IsDatePattern() || IsTimePattern();
-			
-		}
-
 		private bool IsDatePattern()
         {
 			var dateSeperator = Culture.DateTimeFormat.DateSeparator[0];
@@ -799,9 +831,18 @@ namespace Expressionator.Expressions.Builder
 			var invalidChar = false;
 			var isDate = false;
 
-			for (int i = 0; i < 11; i++)
+			var stringToCheck = new StringBuilder();
+			for (int i = 0; i < datePattern.Length + 1; i++)
 			{
-				var charAtPosition = input.PeekSkip(currentPos, i - 1);
+				stringToCheck.Append(input.PeekSkip(currentPos, i - 1));
+			}
+
+			var finalToCheck = AddTrailingZeros(stringToCheck.ToString(), dateSeperator);
+
+			for (int i = 0; i < datePattern.Length +1; i++)
+			{
+				char charAtPosition = finalToCheck[i];
+
 				if (i == datePattern.Length) 
 					isDate = !invalidChar && !IsValidForDateOrInt(charAtPosition, true);
 
@@ -814,13 +855,9 @@ namespace Expressionator.Expressions.Builder
 				{
 					invalidChar = (!IsValidForDateOrInt(charAtPosition, false)) || invalidChar;
 				}
-				//if (invalidChar) Debugger.Break();
-
 			}
 
-
 			return isDate;
-
 
 		}
 

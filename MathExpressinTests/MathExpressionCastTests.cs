@@ -8,9 +8,15 @@ using System.Globalization;
 
 namespace MathExpressinTests
 {
+  
+
     [TestClass]
     public class MathExpressionCastTests
-    {
+    {  
+        private static readonly CultureInfo de = new CultureInfo("de-DE");
+        private static readonly CultureInfo en = new CultureInfo("en-EN");
+        private static readonly CultureInfo gb = new CultureInfo("en-GB");
+        private static readonly CultureInfo us = new CultureInfo("en-US");
 
         [TestMethod()]
         public void IntTest()
@@ -24,7 +30,7 @@ namespace MathExpressinTests
         [TestMethod]
         public void DoubleTest()
         {
-            var resultDouble = ExpressionEvaluator.EvaluateExpression<double>("1,5 + 1,487", new CultureInfo("de-DE"));
+            var resultDouble = ExpressionEvaluator.EvaluateExpression<double>("1,5 + 1,487", de);
             Assert.AreEqual(resultDouble.GetType(), typeof(double));
 
         }
@@ -33,7 +39,7 @@ namespace MathExpressinTests
         [TestMethod]
         public void DateTest()
         {
-            var result = ExpressionEvaluator.EvaluateExpression<DateTime>("01.01.2021", new CultureInfo("de-DE"));
+            var result = ExpressionEvaluator.EvaluateExpression<DateTime>("01.01.2021", de);
             Assert.AreEqual(result, new DateTime(2021, 01, 01));
             Assert.AreEqual(result.GetType(), typeof(DateTime));
 
@@ -42,7 +48,7 @@ namespace MathExpressinTests
         [TestMethod]
         public void DateDETest()
         {
-            var result = ExpressionEvaluator.EvaluateExpression<DateTime>("01.01.2021", new CultureInfo("de-DE"));
+            var result = ExpressionEvaluator.EvaluateExpression<DateTime>("01.01.2021", de);
             Assert.AreEqual(result, new DateTime(2021, 01, 01));
             Assert.AreEqual(result.GetType(), typeof(DateTime));
 
@@ -51,7 +57,7 @@ namespace MathExpressinTests
         [TestMethod]
         public void DateGBTest()
         {
-            var result = ExpressionEvaluator.EvaluateExpression<DateTime>("24/01/2021", new CultureInfo("en-GB"));
+            var result = ExpressionEvaluator.EvaluateExpression<DateTime>("24/01/2021", gb);
             Assert.AreEqual(result, new DateTime(2021, 01, 24));
             Assert.AreEqual(result.GetType(), typeof(DateTime));
 
@@ -60,7 +66,7 @@ namespace MathExpressinTests
         [TestMethod]
         public void DateUSTest()
         {
-            var result = ExpressionEvaluator.EvaluateExpression<DateTime>("01/24/2021", new CultureInfo("en-EN"));
+            var result = ExpressionEvaluator.EvaluateExpression<DateTime>("01/24/2021", en);
             Assert.AreEqual(result, new DateTime(2021, 01, 24));
             Assert.AreEqual(result.GetType(), typeof(DateTime));
 
@@ -69,17 +75,48 @@ namespace MathExpressinTests
         [TestMethod]
         public void DateUS2Test()
         {
-            var result = ExpressionEvaluator.EvaluateExpression("1/24/2021", new CultureInfo("en-EN"));
-            Assert.AreEqual(result.Number, (1d/24d/2021d));
+            var result = ExpressionEvaluator.EvaluateExpression("1/24/2021", en);
+            Assert.AreEqual(result.Date, new DateTime(2021,1,24));
           
         }
 
+        [TestMethod]
+        public void NoDateTest()
+        {
+            var result = ExpressionEvaluator.EvaluateExpression("100 /50/2", en);
+            Assert.AreEqual(result.Number, 1);
+
+        }
+
+        [TestMethod]
+        public void NoDate2Test()
+        {
+            var result = ExpressionEvaluator.EvaluateExpression("24/1/2001", de);
+            Assert.AreEqual(result.Number, (24d/1d/2001d));
+
+        }
+
+        [TestMethod]
+        public void DateUDeShortTest()
+        {
+            var result = ExpressionEvaluator.EvaluateExpression("1.2.2021", de);
+            Assert.AreEqual(result.Date, new DateTime(2021, 2, 1));
+
+        }
 
         [TestMethod]
         public void DateAddMonthsTest()
         {
-            var de = new CultureInfo("de-DE");
             var result = ExpressionEvaluator.EvaluateExpression<DateTime>("01.01.2021 + Months(5)", de);
+            Assert.AreEqual(result, new DateTime(2021, 05, 31));
+            Assert.AreEqual(result.GetType(), typeof(DateTime));
+
+        }
+
+        [TestMethod]
+        public void DateAddMonths2Test()
+        {
+            var result = ExpressionEvaluator.EvaluateExpression<DateTime>("1.1.2021 + Months(5)", de);
             Assert.AreEqual(result, new DateTime(2021, 05, 31));
             Assert.AreEqual(result.GetType(), typeof(DateTime));
 
@@ -88,12 +125,10 @@ namespace MathExpressinTests
         [TestMethod]
         public void DateBaseTest()
         {
-            var de = new CultureInfo("de-DE");
             var result = ExpressionEvaluator.EvaluateExpression<DateTime>("23.10.4567", de);
             Assert.AreEqual(result, new DateTime(4567, 10, 23));
             Assert.AreEqual(result.GetType(), typeof(DateTime));
 
-            var en = new CultureInfo("en-EN");
             var resulten = ExpressionEvaluator.EvaluateExpression<DateTime>("10/23/4567", en);
             Assert.AreEqual(resulten, new DateTime(4567, 10, 23));
             Assert.AreEqual(resulten.GetType(), typeof(DateTime));
@@ -104,7 +139,6 @@ namespace MathExpressinTests
         [TestMethod]
         public void TimeTest()
         {
-            var de = new CultureInfo("de-DE");
             var result = ExpressionEvaluator.EvaluateExpression<DateTime>("01:23", de);
             Assert.AreEqual(result.Hour, new DateTime(0001, 01, 01, 1,23,0).Hour );
             Assert.AreEqual(result.Minute, new DateTime(0001, 01, 01, 1, 23, 0).Minute);
@@ -118,7 +152,6 @@ namespace MathExpressinTests
         [TestMethod]
         public void TimeSubstractionTest()
         {
-            var de = new CultureInfo("de-DE");
             var result = ExpressionEvaluator.EvaluateExpression<DateRange>("02:00 - 01:00", de);
             Assert.AreEqual(result.TimeSpan.TotalMinutes, 60);
             
@@ -130,7 +163,6 @@ namespace MathExpressinTests
         [TestMethod]
         public void TimeAdditionTest()
         {
-            var de = new CultureInfo("de-DE");
             var result = ExpressionEvaluator.EvaluateExpression<DateRange>("02:10:05 + 01:10:05", de);
             Assert.AreEqual(result.TimeSpan.Hours, 3);
             Assert.AreEqual(result.TimeSpan.Minutes, 20);
@@ -144,7 +176,6 @@ namespace MathExpressinTests
         [TestMethod]
         public void TimeAdditionOverflowTest()
         {
-            var de = new CultureInfo("de-DE");
             var result = ExpressionEvaluator.EvaluateExpression<DateRange>("02:59:59 + 00:00:10", de);
             Assert.AreEqual(result.TimeSpan.Hours, 3);
             Assert.AreEqual(result.TimeSpan.Minutes, 0);
@@ -158,7 +189,6 @@ namespace MathExpressinTests
         [TestMethod]
         public void TimeDateAdditionTest()
         {
-            var de = new CultureInfo("de-DE");
             var result = ExpressionEvaluator.EvaluateExpression<DateRange>("01.01.2021 - 01:00", de);
             Assert.AreEqual(result.TimeSpan.TotalMinutes, 60);
 
@@ -168,7 +198,6 @@ namespace MathExpressinTests
         [TestMethod]
         public void TimeDateAdditionCastTest()
         {
-            var de = new CultureInfo("de-DE");
             var result = ExpressionEvaluator.EvaluateExpression<double>("Hours(02:00 - 01:00)", de);
             Assert.AreEqual(result, 1);
             result = ExpressionEvaluator.EvaluateExpression<double>("Minutes(01.01.2021 - 01:00)", de);
@@ -181,7 +210,6 @@ namespace MathExpressinTests
         [TestMethod]
         public void DateAdditionTest()
         {
-            var de = new CultureInfo("de-DE");
             var result = ExpressionEvaluator.EvaluateExpression<DateRange>("01.01.2020 - 01.01.2019", de);
             Assert.AreEqual(result.TotalDays, 365);
             Assert.AreEqual(result.TotalDays, 365);
@@ -194,7 +222,7 @@ namespace MathExpressinTests
         [TestMethod]
         public void DateAddDaysTest()
         {
-            var result = ExpressionEvaluator.EvaluateExpression<DateTime>("01.01.2021 + Days(5)", new CultureInfo("de-DE"));
+            var result = ExpressionEvaluator.EvaluateExpression<DateTime>("01.01.2021 + Days(5)", de);
             Assert.AreEqual(result, new DateTime(2021, 01, 06));
             Assert.AreEqual(result.GetType(), typeof(DateTime));
 
@@ -203,7 +231,7 @@ namespace MathExpressinTests
         [TestMethod]
         public void DateAddYearsTest()
         {
-            var result = ExpressionEvaluator.EvaluateExpression<DateTime>("01.01.2021 + Years(5)", new CultureInfo("de-DE"));
+            var result = ExpressionEvaluator.EvaluateExpression<DateTime>("01.01.2021 + Years(5)", de);
             Assert.AreEqual(result, new DateTime(2025, 12, 31));
             Assert.AreEqual(result.GetType(), typeof(DateTime));
 
@@ -212,7 +240,7 @@ namespace MathExpressinTests
         [TestMethod]
         public void DateRangeTest()
         {
-            var result = ExpressionEvaluator.EvaluateExpression<DateRange>("01.01.2021 - 01.01.2020", new CultureInfo("de-DE"));
+            var result = ExpressionEvaluator.EvaluateExpression<DateRange>("01.01.2021 - 01.01.2020", de);
             Assert.AreEqual(result, new DateRange(new DateTime(2020, 01, 01), new DateTime(2021, 01, 01)));
             Assert.AreEqual(result.GetType(), typeof(DateRange));
 

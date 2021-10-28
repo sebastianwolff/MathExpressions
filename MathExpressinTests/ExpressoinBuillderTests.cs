@@ -1,9 +1,12 @@
-﻿using Expressionator.Expressions.Builder;
+﻿using Expressionator;
+using Expressionator.Expressions.Builder;
 using Expressionator.Expressions.Evaluator;
 using Expressionator.Utils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
 
 namespace MathExpressinTests
 {
@@ -14,8 +17,8 @@ namespace MathExpressinTests
         [TestMethod]
         public void IsIntDateStopTest()
         {
-            var en = new System.Globalization.CultureInfo("en-US");
-            var de = new System.Globalization.CultureInfo("de-DE");
+            var en = new CultureInfo("en-US");
+            var de = new CultureInfo("de-DE");
             var ebEN = new ExpressionBuilder(en);
             var ebDE = new ExpressionBuilder(de);
 
