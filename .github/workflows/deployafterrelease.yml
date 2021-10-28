@@ -1,0 +1,29 @@
+name: Deploy after Release
+
+on:
+ release:
+  types:
+    - created
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 5.0.x
+    - name: Restore dependencies
+      run: dotnet restore Expressions.sln
+      working-directory: Expressions
+    - name: Build
+      run: dotnet build Expressions.sln --configuration Release  --no-restore
+      working-directory: Expressions
+    - name: Test
+      run:  dotnet test  Expressions.sln --configuration Release
+      working-directory: Expressions
+    - name: Put Nuget
+      run: dotnet nuget push D:\Release\bin\MathExpression.net.*.nupkg --api-key ${{secrets.NUGET_API_KEY}} --source https://api.nuget.org/v3/index.json        
