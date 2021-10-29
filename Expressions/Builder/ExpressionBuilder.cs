@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using MathExpressinTests;
 using System.Linq;
 using System.Diagnostics;
+using Expressionator.Translations;
 
 /** 
  * EBNF-alike syntax:
@@ -249,15 +250,21 @@ namespace Expressionator.Expressions.Builder
 
 				if (currentToken.TokenType == Token.Type.Symbol)
 				{
-					if (currentToken.StringValue == "tag")
+                    switch (ReservedKeyWord.GetKeyWordType(currentToken.StringValue))
+                    {
+						case KeyWords.Day:
 						result = new DateQualExpr(DateQualExpr.Quals.Day, result);
-					else if (currentToken.StringValue == "monat")
-						result = new DateQualExpr(DateQualExpr.Quals.Month, result);
-					else if (currentToken.StringValue == "jahr")
-						result = new DateQualExpr(DateQualExpr.Quals.Year, result);
-					else
-						continue;
-
+							break;
+						case KeyWords.Month:
+							result = new DateQualExpr(DateQualExpr.Quals.Month, result);
+							break;
+						case KeyWords.Year:
+							result = new DateQualExpr(DateQualExpr.Quals.Year, result);
+							break;
+						default:
+							continue;
+                    }
+                    
 					NextToken(); // consume qualification symbol
 				}
 				else
@@ -323,65 +330,46 @@ namespace Expressionator.Expressions.Builder
 						Consume(Token.Type.RndClose);
 						var symbol = symbolName.ToLower().StartsWith("round") || symbolName.ToLower().StartsWith("runden") ? "round" : symbolName.ToLower();
 
-						switch (symbol) {
-							case "tage":
-							case "days":
-								return new TimeSpanCastExpr(TimeSpanCastExpr.Units.Day, arg);
-							case "monate":
-							case "months":
-									return new TimeSpanCastExpr(TimeSpanCastExpr.Units.Month, arg);
-							case "jahre":
-							case "years":
-									return new TimeSpanCastExpr(TimeSpanCastExpr.Units.Year, arg);
-							case "hours":
-							case "stunden":
-								return new TimeSpanCastExpr(TimeSpanCastExpr.Units.Hour, arg);
-							case "minutes":
-							case "minuten":
-								return new TimeSpanCastExpr(TimeSpanCastExpr.Units.Minute, arg);
-							case "sekunden":
-							case "seconds":
-								return new TimeSpanCastExpr(TimeSpanCastExpr.Units.Second, arg);
+                        switch (ReservedKeyWord.GetKeyWordType(symbol))
+                        {
+                            case KeyWords.Days:
+                                return new TimeSpanCastExpr(TimeSpanCastExpr.Units.Day, arg);
+                            case KeyWords.Months:
+                                return new TimeSpanCastExpr(TimeSpanCastExpr.Units.Month, arg);
+                            case KeyWords.Years:
+                                return new TimeSpanCastExpr(TimeSpanCastExpr.Units.Year, arg);
+                            case KeyWords.Hours:
+                                return new TimeSpanCastExpr(TimeSpanCastExpr.Units.Hour, arg);
+                            case KeyWords.Minutes:
+                                return new TimeSpanCastExpr(TimeSpanCastExpr.Units.Minute, arg);
+                            case KeyWords.Seconds:
+                                return new TimeSpanCastExpr(TimeSpanCastExpr.Units.Second, arg);
 
+                            case KeyWords.Year:
+                                return new DateQualExpr(DateQualExpr.Quals.Year, arg);
+                            case KeyWords.Month:
+                                return new DateQualExpr(DateQualExpr.Quals.Month, arg);
+                            case KeyWords.Day:
+                                return new DateQualExpr(DateQualExpr.Quals.Day, arg);
+                            case KeyWords.Hour:
+                                return new DateQualExpr(DateQualExpr.Quals.Hour, arg);
+                            case KeyWords.Minute:
+                                return new DateQualExpr(DateQualExpr.Quals.Minute, arg);
+                            case KeyWords.Second:
+                                return new DateQualExpr(DateQualExpr.Quals.Second, arg);
 
-							case "jahr":
-							case "year":
-								return new DateQualExpr(DateQualExpr.Quals.Year, arg);
-							case "monat":
-							case "month":
-									return new DateQualExpr(DateQualExpr.Quals.Month, arg);
-							case "tag":
-							case "day":
-									return new DateQualExpr(DateQualExpr.Quals.Day, arg);
-							case "stunde":
-							case "hour":
-								return new DateQualExpr(DateQualExpr.Quals.Hour, arg);
-							case "minute":
-								return new DateQualExpr(DateQualExpr.Quals.Minute, arg);
-							case "second":
-							case "sekunde":
-								return new DateQualExpr(DateQualExpr.Quals.Second, arg);
+                            case KeyWords.Round:
+                                return GetPrecision(symbolName, arg);
+                            case KeyWords.Unknown:
+								throw new Exception(String.Format("Unknown Function: '{0}'", symbolName));
+				        }
 							
-							case "round":
-									var precisionString = symbolName.ToLower().Replace("round", "");
-
-									precisionString = (string.IsNullOrEmpty(precisionString))
-										? "0"
-										: precisionString;
-
-									if (!int.TryParse(precisionString, out int precision))
-                                    	throw new UnknownPrecisionException($"{precisionString}");
-									
-									return new RoundCastExpr(precision, arg);
-						
-						}
-
-						throw new Exception(String.Format("Unknown Function: '{0}'", symbolName));
-					}
-					else
+                            throw new Exception(String.Format("Unknown Function: '{0}'", symbolName));
+                    }
+                    else
 						return new VariableNode(symbolName, true);
-				}
-				case Token.Type.Date:
+                    }
+                case Token.Type.Date:
 				{
 					Node result = new DateExpr(currentToken.DateValue);
 					NextToken();
@@ -400,10 +388,30 @@ namespace Expressionator.Expressions.Builder
 				}
 				default:
 					throw new UnexpectedTokenException(currentToken.StringValue, currentToken.Line, currentToken.Column);
-			}
-		}
+            }
+        }
 
-		private Node Conditional(bool get)
+        /// <summary>
+        /// Gets RoundCastExpression with extracted Precision
+        /// </summary>
+        /// <param name="symbolName"></param>
+        /// <param name="arg"></param>
+        /// <returns></returns>
+        private static Node GetPrecision(string symbolName, Node arg)
+        {
+            var precisionString = symbolName.ToLower().Replace("round", "");
+
+            precisionString = (string.IsNullOrEmpty(precisionString))
+                ? "0"
+                : precisionString;
+
+            if (!int.TryParse(precisionString, out int precision))
+                throw new UnknownPrecisionException($"{precisionString}");
+
+            return new RoundCastExpr(precision, arg);
+        }
+
+        private Node Conditional(bool get)
 		{
 			if (get)
 				Consume(Token.Type.If);
@@ -445,7 +453,7 @@ namespace Expressionator.Expressions.Builder
 		private char[] input;
 		private int line;
 		private int column;
-		private int currentChar;
+		private char currentChar;
 		private long currentPos = 0;
 		private Token currentToken;
 	
@@ -467,7 +475,7 @@ namespace Expressionator.Expressions.Builder
 			
 			line = 1;
 			column = 0;
-			currentChar = 0;
+			currentChar = (char)0;
 
 			NextChar();
 			NextToken();
@@ -487,61 +495,78 @@ namespace Expressionator.Expressions.Builder
 			return currentChar = input.Read(ref currentPos);
 		}
 
+		private void MoveBack(int positions)
+		{
+            while (positions+1 != 0)
+            {
+				if (currentChar == '\n')
+				{
+					throw new Exception("Moveback over Multilines isn't supported");
+				}
+				else
+				{
+					--column;
+				}
+				currentPos--;
+				positions--;
+			}
+			NextChar();
+		}
+
+		/// <summary>
+		/// List of Token, that indicates, that the currentCahr ist not part of a Number or Date
+		/// </summary>
+		private static readonly char[] unwantedIntDateStopToken = new char[] {
+				 (char)0,
+				 ' ',
+				 '\n',
+				 '\r',
+				 '+',
+				 '*',
+				 '^',
+				 '(',
+				 ')',
+				 '{',
+				 '[',
+				 ']',
+				 '}',
+				 '!',
+				 '<',
+				 '>',
+				 '=',
+				 ',',
+				 '\'',
+				 '"',
+				 '-',
+				 '/',
+				 '.',
+				 ',',
+
+			};
+
+
 		/// <summary>
 		/// Indicates if the Char is not Part of a Number or Date
 		/// </summary>
 		/// <param name="currentChar">The Char</param>
 		/// <param name="couldBeDate">Could the current char series be a DateTime</param>
 		/// <returns></returns>
-		public bool IsIntDateStopToken(int currentChar, bool couldBeDate)
+		public bool IsIntDateStopToken(char currentChar, bool couldBeDate)
         {
-			
-			List<int> expect = new() { Culture.NumberFormat.NumberDecimalSeparator[0], Culture.NumberFormat.NumberGroupSeparator[0] };
-
 			//Prevent Misinterpretation of "/" as DatePart instead of Division 
 			if (couldBeDate)
 			{
-				expect.Add(Culture.DateTimeFormat.DateSeparator[0]);
-				expect.Add(Culture.DateTimeFormat.TimeSeparator[0]);
-			}
-
-			if ( expect.Contains(currentChar))
-			{
-				return false;
-			}
-
-			switch (currentChar)
-			{
-				case -1:
-				case (char)0:
-				case ' ':
-				case '\n':
-				case '\r':
-				case '+':
-				case '*':
-				case '^':
-				case '(':
-				case ')':
-				case '{':
-				case '[':
-				case ']':
-				case '}':
-				case '!':
-				case '<':
-				case '>':
-				case '=':
-				case ':':
-				case '\'':
-				case '"':
-				case '-':
-				case '/':
-				case '.':
-				case ',':
-					return true;
-				default:
+				if (excludeSeperatorsWithDate.Contains(currentChar))
+					return false;
+            }
+            else
+            {
+				if (excludeSeperators.Contains(currentChar))
 					return false;
 			}
 
+			return unwantedIntDateStopToken.Contains(currentChar);
+           
 		}
 
 		private Token NextToken()
@@ -645,14 +670,13 @@ namespace Expressionator.Expressions.Builder
 				int _column = column;
 				string symbol = ParseSymbol();
 
-				for (Dictionary<string, Token.Type>.Enumerator e = keywords.GetEnumerator(); e.MoveNext(); )
-				{
-					if (e.Current.Key.ToUpper() == symbol.ToUpper())
-					{
-						currentToken = new Token(e.Current.Value, _line, _column);
-						return currentToken;
-					}
+                if (tokenTypeKeywords.TryGetValue(symbol.ToUpper(), out Token.Type type ))
+                {
+					currentToken = new Token(type, _line, _column);
+					return currentToken;
 				}
+
+				
 
 				return currentToken = new Token(symbol, line, column);
 			}
@@ -665,43 +689,46 @@ namespace Expressionator.Expressions.Builder
 			throw new UnexpectedTokenException(String.Format("{0}", (char)currentChar), line, column);
 		}
 
-		private static readonly Dictionary<string, Token.Type> keywords = CreateKeywordMappings();
+		private static readonly Dictionary<string, Token.Type> tokenTypeKeywords = ReservedKeyWord.CreateTokenTypeMappings();
+		private readonly string dateTimeFormat;
+        private readonly string cleanedDatePattern;
+        private readonly char[] excludeSeperators;
+		private readonly char[] excludeSeperatorsWithDate;
+        private readonly char dateSeperator;
+        private readonly int dateSeperatorFirstPosition;
+        private readonly int dateSeperatorLastPosition;
+        private readonly char timeSeperator;
+        private readonly string timePattern;
+        private readonly int timeSeperatorFirstPosition;
+        private readonly int timeSeperatorLastPosition;
 
-        public ExpressionBuilder(CultureInfo culture)
+		public ExpressionBuilder(CultureInfo culture)
         {
             Culture = culture;
+
+            #region InitDateTime Patterns
+            cleanedDatePattern = CleanDatePattern(Culture.DateTimeFormat.ShortDatePattern);
+			dateTimeFormat = $"{cleanedDatePattern} {CleanTimePattern(Culture.DateTimeFormat.LongTimePattern)}";
+			excludeSeperators = new char[] { Culture.NumberFormat.NumberDecimalSeparator[0], Culture.NumberFormat.NumberGroupSeparator[0] };
+			
+			excludeSeperatorsWithDate =  new char[] { Culture.DateTimeFormat.TimeSeparator[0], Culture.DateTimeFormat.DateSeparator[0], Culture.NumberFormat.NumberDecimalSeparator[0], Culture.NumberFormat.NumberGroupSeparator[0] };
+
+			dateSeperator = Culture.DateTimeFormat.DateSeparator[0];
+
+			dateSeperatorFirstPosition = cleanedDatePattern.IndexOf(dateSeperator);
+			dateSeperatorLastPosition = cleanedDatePattern.LastIndexOf(dateSeperator);
+
+			timeSeperator = Culture.DateTimeFormat.TimeSeparator[0];
+			timePattern = Culture.DateTimeFormat.LongTimePattern;
+
+			timeSeperatorFirstPosition = timePattern.IndexOf(timeSeperator);
+			timeSeperatorLastPosition = timePattern.LastIndexOf(timeSeperator);
+            #endregion
         }
 
-        private static Dictionary<string, Token.Type> CreateKeywordMappings()
-		{
-            Dictionary<string, Token.Type> keywords = new()
-            {
-                ["WENN"] = Token.Type.If,
-                ["DANN"] = Token.Type.Then,
-                ["SONST"] = Token.Type.Else,
-
-                ["INNERHALB"] = Token.Type.Contains,
-
-                ["UND"] = Token.Type.And,
-                ["ODER"] = Token.Type.Or,
-                ["XODER"] = Token.Type.XOr,
 
 
-                ["IF"] = Token.Type.If,
-                ["THEN"] = Token.Type.Then,
-                ["ELSE"] = Token.Type.Else,
-
-                ["BETWEEN"] = Token.Type.Contains,
-
-                ["AND"] = Token.Type.And,
-                ["OR"] = Token.Type.Or,
-                ["XOR"] = Token.Type.XOr
-            };
-
-            return keywords;
-		}
-
-		private static bool IsDigit(int ch)
+        private static bool IsDigit(int ch)
 		{
 			return ch >= '0' && ch <= '9';
 		}
@@ -717,7 +744,6 @@ namespace Expressionator.Expressions.Builder
 			return IsAlpha(ch) || ch == '_';
 		}
 
-		
 		/*
 		 * NUMBER       ::= DIGIT... [('.' | ',') DIGIT...]
 		 * 
@@ -732,27 +758,16 @@ namespace Expressionator.Expressions.Builder
             int _line = line;
             int _column = column;
 
-			BuildNumberDateSeries(out string buildedString, out bool isDateOrTimeFormat, out bool isTimePattern);
+            BuildNumberDateSeries(out string buildedString, out bool isDateOrTimeFormat, out bool isTimePattern);
 
-            ///Add Datepart to the TimePart
-            buildedString = (isDateOrTimeFormat && isTimePattern) ?
-                $"{DateTime.MinValue.ToString(CleanDatePattern(Culture.DateTimeFormat.ShortDatePattern))} {TimeFormatWithSeconds(buildedString)}"
-                : buildedString;
-
-			
-			///Add TimePart to the Datepart
-			buildedString = (isDateOrTimeFormat && !isTimePattern) ?
-			$"{AddTrailingZeros(buildedString, Culture.DateTimeFormat.DateSeparator[0])} {DateTime.MinValue.ToString(CleanTimePattern(Culture.DateTimeFormat.LongTimePattern))}"
-			: buildedString;
-
-			var dateTimeFormat = $"{CleanDatePattern(Culture.DateTimeFormat.ShortDatePattern)} {CleanTimePattern(Culture.DateTimeFormat.LongTimePattern)}";
+            CleanBuildedStringByCultureInfo(ref buildedString, isDateOrTimeFormat, isTimePattern);
 
 			if (isDateOrTimeFormat && buildedString.TryGetDate(dateTimeFormat, out DateTime dateValue))
             {
                 return new Token(dateValue, _line, _column, isTimePattern);
             }
 
-			NumberStyles numberStyles = NumberStyles.AllowDecimalPoint | NumberStyles.Number;
+            var numberStyles = NumberStyles.AllowDecimalPoint | NumberStyles.Number;
 
             if (Double.TryParse(buildedString, numberStyles, Culture, out double doubleValue))
             {
@@ -760,6 +775,29 @@ namespace Expressionator.Expressions.Builder
             }
 
             throw new Exception("Invalid date/number format in expression.");
+        }
+
+		/// <summary>
+		/// Add Time Part to Datestring or Datepart to Timestring
+		/// </summary>
+		/// <param name="buildedString"></param>
+		/// <param name="isDateOrTimeFormat"></param>
+		/// <param name="isTimePattern"></param>
+		/// <returns></returns>
+        private void CleanBuildedStringByCultureInfo(ref string buildedString, bool isDateOrTimeFormat, bool isTimePattern)
+        {
+            ///Add Datepart to the TimePart
+            buildedString = (isDateOrTimeFormat && isTimePattern) ?
+                $"{DateTime.MinValue.ToString(cleanedDatePattern)} {TimeFormatWithSeconds(buildedString)}"
+                : buildedString;
+
+
+            ///Add TimePart to the Datepart
+            buildedString = (isDateOrTimeFormat && !isTimePattern) ?
+            $"{AddLeadingZeros(buildedString, Culture.DateTimeFormat.DateSeparator[0])} {DateTime.MinValue.ToString(CleanTimePattern(Culture.DateTimeFormat.LongTimePattern))}"
+            : buildedString;
+
+            
         }
 
         private static string CleanTimePattern(string longTimePattern)
@@ -782,11 +820,11 @@ namespace Expressionator.Expressions.Builder
 
         private string TimeFormatWithSeconds(string buildedString)
         {
-            buildedString = AddTrailingZeros(buildedString, Culture.DateTimeFormat.TimeSeparator[0]); 
+            buildedString = AddLeadingZeros(buildedString, Culture.DateTimeFormat.TimeSeparator[0]); 
             return (buildedString.Length == 5) ? $"{buildedString}{Culture.DateTimeFormat.TimeSeparator}00" : buildedString;
         }
 
-        private static string AddTrailingZeros(string buildedString, char seperator)
+        private static string AddLeadingZeros(string buildedString, char seperator)
         {
             var splitted = buildedString.Split(seperator);
             var newBuildedString = new StringBuilder();
@@ -806,94 +844,122 @@ namespace Expressionator.Expressions.Builder
 
         private void BuildNumberDateSeries(out string buildedString, out bool isDateOrTimeFormat, out bool isTimePattern)
         {
-            var sb = new StringBuilder(100);
-			
-			isTimePattern = IsTimePattern();
-			isDateOrTimeFormat = IsDatePattern() || isTimePattern;
+            buildedString = string.Empty;
+            isDateOrTimeFormat = false;
+            isTimePattern = false;
 
-            while (IsValidForDateOrInt(currentChar, isDateOrTimeFormat))
+            StringBuilder stringToCheck = GetNumberDateBlock(true);
+
+            if (IsTimePattern(stringToCheck.ToString(), out string timeString))
             {
-                sb.Append((char)currentChar);
+                buildedString = timeString;
+                isDateOrTimeFormat = true;
+                isTimePattern = true;
+                return;
+            }
+
+            if (IsDatePattern(stringToCheck.ToString(), out string dateString))
+            {
+                buildedString = dateString;
+                isDateOrTimeFormat = true;
+                return;
+            }
+
+			///Special Case: if value is not Date or Time but have DateSeperator, it must be Recreated wtihout DateSeperatortoken
+            if (stringToCheck.ToString().Any(c => c=='/' || c == ':'))
+            {
+                MoveBack(stringToCheck.Length);
+				stringToCheck = GetNumberDateBlock(false);
+            }
+
+            buildedString = stringToCheck.ToString();
+
+
+        }
+
+        private StringBuilder GetNumberDateBlock(bool couldBeDate)
+        {
+            var stringToCheck = new StringBuilder();
+
+            while (IsValidForDateOrInt(currentChar, couldBeDate))
+            {
+                stringToCheck.Append(currentChar);
                 NextChar();
             }
 
-			buildedString = sb.ToString();
+            return stringToCheck;
         }
 
-		private bool IsDatePattern()
+        private bool IsDatePattern(string stringToCheck, out string dateString)
         {
-			var dateSeperator = Culture.DateTimeFormat.DateSeparator[0];
-			var datePattern = CleanDatePattern(Culture.DateTimeFormat.ShortDatePattern);
-			
-			var dateSeperatorFirstPosition = datePattern.IndexOf(dateSeperator);
-			var dateSeperatorLastPosition = datePattern.LastIndexOf(dateSeperator);
+			dateString = string.Empty;
 
+			
+			var finalToCheck = AddLeadingZeros(stringToCheck, dateSeperator);
+
+			//If Pattern Size not matches String Size -> return Immediately
+			//Cant match
+			if (finalToCheck.Length < cleanedDatePattern.Length)
+				return false;
+
+		
 			var invalidChar = false;
 			var isDate = false;
 
-			var stringToCheck = new StringBuilder();
-			for (int i = 0; i < datePattern.Length + 1; i++)
-			{
-				stringToCheck.Append(input.PeekSkip(currentPos, i - 1));
-			}
 
-			var finalToCheck = AddTrailingZeros(stringToCheck.ToString(), dateSeperator);
-
-			for (int i = 0; i < datePattern.Length +1; i++)
+			for (int i = 0; i < cleanedDatePattern.Length; i++)
 			{
 				char charAtPosition = finalToCheck[i];
-
-				if (i == datePattern.Length) 
-					isDate = !invalidChar && !IsValidForDateOrInt(charAtPosition, true);
-
+				
+				if (i == cleanedDatePattern.Length-1)
+				{
+					isDate = !invalidChar;// && !IsValidForDateOrInt(charAtPosition, true);
+					break;
+				}
+				
 				if (i == dateSeperatorFirstPosition || i == dateSeperatorLastPosition)
 				{
 					//Expect Time Seperator at this Position!
 					invalidChar = (charAtPosition != dateSeperator) || invalidChar;
 				}
-				else
-				{
-					invalidChar = (!IsValidForDateOrInt(charAtPosition, false)) || invalidChar;
-				}
+		
 			}
+
+			dateString = isDate ? finalToCheck : string.Empty;
 
 			return isDate;
 
 		}
 
-		private bool IsTimePattern()
+		private bool IsTimePattern(string stringToCheck, out string dateString)
 		{
-			var timeSeperator = Culture.DateTimeFormat.TimeSeparator[0];
-			var timePattern = Culture.DateTimeFormat.LongTimePattern;
+			dateString = string.Empty;
+			if (stringToCheck.Length != 5 && stringToCheck.Length != 8)
+				return false;
 
-			var timeSeperatorFirstPosition = timePattern.IndexOf(timeSeperator);
-			var timeSeperatorLastPosition = timePattern.LastIndexOf(timeSeperator);
-
+			
 			var invalidChar = false;
 
 			//Format 00:00
 			var isTwoBlocksTime = false;
 			//Format 00:00:00 
 			var isThreeBlocksTime = false;
-
-			for (int i = 0; i < 9; i++)
+			
+			for (int i = 0; i < stringToCheck.Length; i++)
 			{
-				var charAtPosition = input.PeekSkip(currentPos, i-1);
-                if (i == 5) isTwoBlocksTime = !invalidChar && !IsValidForDateOrInt(charAtPosition, true);
-				if (i == 8) isThreeBlocksTime = !invalidChar && !IsValidForDateOrInt(charAtPosition, true);
+				var charAtPosition = stringToCheck[i];
+
+				if (i == 4) isTwoBlocksTime = !invalidChar;//&& !IsValidForDateOrInt(charAtPosition, true);
+				if (i == 7) isThreeBlocksTime = !invalidChar;// && !IsValidForDateOrInt(charAtPosition, true);
 		
 				if (i == timeSeperatorFirstPosition || i == timeSeperatorLastPosition)
 				{
 					//Expect Time Seperator at this Position!
 					invalidChar = (charAtPosition != timeSeperator) || invalidChar;
                 }
-                else
-                {
-					invalidChar = (!IsValidForDateOrInt( charAtPosition, false)) || invalidChar;
-				}
-
 			}
 
+			dateString = isTwoBlocksTime || isThreeBlocksTime ? stringToCheck : string.Empty;
 
 			return isTwoBlocksTime || isThreeBlocksTime;
 
@@ -919,7 +985,7 @@ namespace Expressionator.Expressions.Builder
 			return datePattern;
 		}
 
-        public bool IsValidForDateOrInt(int currentChar, bool couldBeDate)
+        public bool IsValidForDateOrInt(char currentChar, bool couldBeDate)
         {
 			var valid = false;
 			valid = IsDigit(currentChar) || valid;
@@ -980,6 +1046,6 @@ namespace Expressionator.Expressions.Builder
 					return false;
 			}
 		}
-		#endregion
-	}
+        #endregion
+    }
 }

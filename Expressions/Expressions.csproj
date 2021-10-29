@@ -22,9 +22,9 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/sebastianwolff/MathExpressions</RepositoryUrl>
     <Description>A simple .NET 5 Math Expression Parser / Interpreter. This library interprets mathematical expressions from text input.</Description>
-    <AssemblyVersion>1.1.0.2056</AssemblyVersion>
-    <FileVersion>1.1.0.2056</FileVersion>
-    <Version>1.1.0.2056</Version>
+    <AssemblyVersion>1.1.0.2175</AssemblyVersion>
+    <FileVersion>1.1.0.2175</FileVersion>
+    <Version>1.1.0.2175</Version>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <OutputPath>..\..\..\..\Debug\bin\</OutputPath>

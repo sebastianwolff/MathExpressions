@@ -45,5 +45,16 @@ namespace MathExpressinTests
             return ref chars[currentPos + stepOver];
 
         }
+
+        public static bool Contains(this char[] chars, char searchedChar)
+        {
+            for (int i = 0; i < chars.Length; i++)
+            {
+                if (chars[i] == searchedChar)
+                    return true;
+
+            }
+            return false;
+        }
     }
 }

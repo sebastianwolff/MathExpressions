@@ -224,31 +224,20 @@ namespace Expressionator.Expressions.Evaluator
 
 			public override string ToString()
 			{
-                switch (Type)
+                return Type switch
                 {
-                    case ResultTypes.Boolean:
-                        return Boolean.ToString();
-                    case ResultTypes.Date:
-                        return Date.ToString();
-					case ResultTypes.Time:
-						return Date.ToLongTimeString();
-					case ResultTypes.DateRange:
-                        return String.Format("DATERANGE({0})", DateRange);
-                    case ResultTypes.Number:
-                        return Number.ToString();
-                    case ResultTypes.NumberRange:
-                        return String.Format("NUMBERRANGE({0})", NumberRange);
-                    case ResultTypes.TimeSpan:
-                        return String.Format("TIMESPAN({0})", TimeSpan);
-                    case ResultTypes.TimeSpanRange:
-                        return String.Format("TIMESPAN({0}) .. TIMESPAN({1})", TimeSpanRange.Key, TimeSpanRange.Value);
-                    case ResultTypes.Text:
-                        return _text;
-                    case ResultTypes.TextRange:
-						throw new NotImplementedException("TextRange not implemented");
-                    default:
-                        throw new Exception("Internal error: Unhandled enum value.");
-                }
+                    ResultTypes.Boolean => Boolean.ToString(),
+                    ResultTypes.Date => Date.ToString(),
+                    ResultTypes.Time => Date.ToLongTimeString(),
+                    ResultTypes.DateRange => String.Format("DATERANGE({0})", DateRange),
+                    ResultTypes.Number => Number.ToString(),
+                    ResultTypes.NumberRange => String.Format("NUMBERRANGE({0})", NumberRange),
+                    ResultTypes.TimeSpan => String.Format("TIMESPAN({0})", TimeSpan),
+                    ResultTypes.TimeSpanRange => String.Format("TIMESPAN({0}) .. TIMESPAN({1})", TimeSpanRange.Key, TimeSpanRange.Value),
+                    ResultTypes.Text => _text,
+                    ResultTypes.TextRange => throw new NotImplementedException("TextRange not implemented"),
+                    _ => throw new Exception("Internal error: Unhandled enum value."),
+                };
             }
         }
         #endregion
@@ -1308,36 +1297,38 @@ namespace Expressionator.Expressions.Evaluator
 					}
 					break;
 				case Result.ResultTypes.DateRange:
-					switch (timeSpan.Unit)
-					{
-						case TimeSpanCastExpr.Units.Day:
-							result = new Result(result.DateRange.TotalDays);
-							break;
-						case TimeSpanCastExpr.Units.Month:
-							result = new Result(result.DateRange.TotalMonths);
-							break;
-						case TimeSpanCastExpr.Units.Year:
-							result = new Result(result.DateRange.TotalYears);
-							break;
-						case TimeSpanCastExpr.Units.Hour:
-							result = new Result(result.DateRange.TimeSpan.TotalHours);
-							break;
-						case TimeSpanCastExpr.Units.Minute:
-							result = new Result(result.DateRange.TimeSpan.TotalMinutes);
-							break;
-						case TimeSpanCastExpr.Units.Second:
-							result = new Result(result.DateRange.TimeSpan.TotalSeconds);
-							break;
-						default:
+                    switch (timeSpan.Unit)
+                    {
+                        case TimeSpanCastExpr.Units.Day:
+                            result = new Result(result.DateRange.TotalDays);
+                            break;
+                        case TimeSpanCastExpr.Units.Month:
+                            result = new Result(result.DateRange.TotalMonths);
+                            break;
+                        case TimeSpanCastExpr.Units.Year:
+                            result = new Result(result.DateRange.TotalYears);
+                            break;
+                        case TimeSpanCastExpr.Units.Hour:
+                            result = new Result(result.DateRange.TimeSpan.TotalHours);
+                            break;
+                        case TimeSpanCastExpr.Units.Minute:
+                            result = new Result(result.DateRange.TimeSpan.TotalMinutes);
+                            break;
+                        case TimeSpanCastExpr.Units.Second:
+                            result = new Result(result.DateRange.TimeSpan.TotalSeconds);
+                            break;
+                        case TimeSpanCastExpr.Units.None:
 							throw new Exception("Internal error: Unhandled enum value.");
-					}
-					break;
+                        default:
+                            throw new Exception("Internal error: Unhandled enum value.");
+                    }
+                    break;
 				default:
 					throw new ExpressionEvaluationException("Invalid cast.");
-			}
-		}
+            }
+        }
 
-		public void Visit(RoundCastExpr roundCast)
+        public void Visit(RoundCastExpr roundCast)
 		{
 			result = Evaluate(roundCast.Expression);
 

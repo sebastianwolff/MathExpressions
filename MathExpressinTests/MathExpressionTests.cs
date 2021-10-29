@@ -14,10 +14,8 @@ namespace MathExpressinTests
         public class ExpressionEvaluatorTests
         {
 
-            private static readonly CultureInfo de = new CultureInfo("de-DE");
-            private static readonly CultureInfo en = new CultureInfo("en-EN");
-            private static readonly CultureInfo gb = new CultureInfo("en-GB");
-            private static readonly CultureInfo us = new CultureInfo("en-US");
+            private static readonly CultureInfo de = new("de-DE");
+            private static readonly CultureInfo en = new("en-EN");
 
 
             [TestMethod()]
